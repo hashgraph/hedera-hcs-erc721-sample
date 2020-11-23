@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package hedera_721;
+
+option java_package = "com.hedera.hashgraph.seven_twenty_one.proto";
+option java_multiple_files = true;
+
+// void mint(address to, uint id)
+message MintFunctionData {
+  bytes to = 1; // <Address>
+  bytes id = 2; // <BigInteger>
+}

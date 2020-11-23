@@ -1,0 +1,65 @@
+plugins {
+	id "com.github.johnrengelman.shadow" version "6.0.0" apply false
+	id "net.ltgt.errorprone" version "1.2.1" apply false
+	id "com.github.ben-manes.versions" version "0.29.0" apply false
+	id "com.google.protobuf" version "0.8.12" apply false
+	id "org.flywaydb.flyway" version "6.5.5" apply false
+	id "com.diffplug.spotless" version "5.8.2" apply false
+	id "nu.studer.jooq" version "5.0.1" apply false
+}
+
+allprojects {
+	apply plugin: "java"
+	apply plugin: "idea"
+	apply plugin: "net.ltgt.errorprone"
+	apply plugin: "com.github.ben-manes.versions"
+	apply plugin: "com.diffplug.spotless"
+
+	sourceCompatibility = 14
+	targetCompatibility = 14
+
+	repositories {
+		jcenter()
+	}
+
+	dependencies {
+		errorprone "com.google.errorprone:error_prone_core:2.4.0"
+		compileOnly "com.google.errorprone:error_prone_annotations:2.4.0"
+
+		errorprone "com.uber.nullaway:nullaway:0.7.9"
+
+		compileOnly "jakarta.annotation:jakarta.annotation-api:2.0.0-RC1"
+		compileOnly "com.google.code.findbugs:jsr305:3.0.2"
+	}
+
+	tasks.withType(JavaCompile).configureEach {
+		options.encoding = "UTF-8"
+
+		options.errorprone {
+			// https://github.com/uber/NullAway
+			warn("NullAway")
+			option("NullAway:AnnotatedPackages", "com.hedera.hashgraph.seven_twenty_one")
+			option("NullAway:TreatGeneratedAsUnannotated", "true")
+
+			// ignore generated and protobuf code
+			disableWarningsInGeneratedCode = true
+			excludedPaths = "(.*proto.*)|(.*generated.*)|(.*db.*)"
+		}
+	}
+
+	spotless {
+		java {
+			importOrder()
+			removeUnusedImports()
+			prettier(['prettier': '2.2.0', 'prettier-plugin-java': '1.0.0']).config(['parser': 'java', 'tabWidth': 4])
+
+			// ignore proto/
+			targetExclude fileTree("${rootProject.projectDir}/proto/src/main/java") {
+				include "**/*.java"
+			}
+		}
+		groovyGradle {
+			greclipse()
+		}
+	}
+}

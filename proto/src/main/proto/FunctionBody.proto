@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package hedera_721;
+
+option java_package = "com.hedera.hashgraph.seven_twenty_one.proto";
+option java_multiple_files = true;
+
+import "Constructor.proto";
+import "Approve.proto";
+import "SetApprovalForAll.proto";
+import "Mint.proto";
+import "Burn.proto";
+import "TransferFrom.proto";
+
+message FunctionBody {
+  bytes caller = 1;
+
+  // Hedera TransactionId.accountId
+  uint64 operatorAccountNum = 2;
+
+  // Hedera TransactionId.validStart.+
+  uint64 validStartNanos = 3;
+
+  oneof data {
+    ConstructorFunctionData constructor = 4;
+    ApproveFunctionData approve = 5;
+    SetApprovalForAllFunctionData setApprovalForAll = 6;
+    MintFunctionData mint = 7;
+    BurnFunctionData burn = 8;
+    TransferFromFunctionData transferFrom = 9;
+  }
+}

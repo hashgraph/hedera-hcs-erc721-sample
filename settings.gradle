@@ -1,2 +1,3 @@
 rootProject.name = 'hedera-erc-721-contract'
-include('contract')
+include 'contract'
+include 'proto'

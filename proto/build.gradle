@@ -1,0 +1,22 @@
+apply plugin: "java-library"
+apply plugin: "com.google.protobuf"
+
+dependencies {
+	api "com.google.protobuf:protobuf-javalite:3.12.4"
+}
+
+protobuf {
+	generatedFilesBaseDir = "$projectDir/src"
+	protoc {
+		artifact = "com.google.protobuf:protoc:3.12.4"
+	}
+	generateProtoTasks {
+		all().each { task ->
+			task.builtins {
+				java {
+					option "lite"
+				}
+			}
+		}
+	}
+}

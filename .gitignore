@@ -6,3 +6,6 @@ build/
 
 # intellij project files
 .idea/
+
+# proto/ generated java
+proto/src/main/java

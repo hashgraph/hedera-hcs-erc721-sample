@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package hedera_721;
+
+option java_package = "com.hedera.hashgraph.seven_twenty_one.proto";
+option java_multiple_files = true;
+
+// void constructor(string tokenName, string tokenSymbol, string baseURI)
+message ConstructorFunctionData {
+  string tokenName = 1;
+  string tokenSymbol = 2;
+  string baseURI = 3;
+}

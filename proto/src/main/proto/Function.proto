@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package hedera_721;
+
+option java_package = "com.hedera.hashgraph.seven_twenty_one.proto";
+option java_multiple_files = true;
+
+message Function {
+  // protobuf-serialized bytes of <FunctionBody>
+  bytes body = 1;
+  // ed25519 signature of the body bytes
+  // signature should match the caller inside of <FunctionBody>
+  bytes signature = 2;
+}
