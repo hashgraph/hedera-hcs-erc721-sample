@@ -9,3 +9,6 @@ build/
 
 # proto/ generated java
 proto/src/main/java
+
+# local environment
+.env
