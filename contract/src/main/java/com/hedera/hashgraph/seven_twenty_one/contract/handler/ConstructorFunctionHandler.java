@@ -2,6 +2,8 @@ package com.hedera.hashgraph.seven_twenty_one.contract.handler;
 
 import com.hedera.hashgraph.seven_twenty_one.contract.Address;
 import com.hedera.hashgraph.seven_twenty_one.contract.State;
+import com.hedera.hashgraph.seven_twenty_one.contract.Status;
+import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.ConstructorFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
 
@@ -18,8 +20,12 @@ public final class ConstructorFunctionHandler
         State state,
         Address caller,
         ConstructorFunctionArguments arguments
-    ) {
-        throw new UnsupportedOperationException();
+    ) throws StatusException {
+        // i. Owner = 0x
+        ensure(state.getOwner() == null, Status.CONSTRUCTOR_ALREADY_CALLED);
+
+        // ii. caller != 0x
+        ensureNotNull(caller, Status.CALLER_NOT_SET);
     }
 
     @Override
@@ -28,6 +34,32 @@ public final class ConstructorFunctionHandler
         Address caller,
         ConstructorFunctionArguments arguments
     ) {
-        throw new UnsupportedOperationException();
+        // note: i through v are not implemented
+
+        // vi. Owner = caller
+        state.setOwner(caller);
+
+        // vii. HolderTokens = {}
+        //  initial state
+
+        // viii. TokenOwners = {}
+        //  initial state
+
+        // ix. OperatorApprovals = {}
+        //  initial state
+
+        // x. TokenApprovals = {}
+        //  initial state
+
+        // xi. TokenName = tokenName
+        state.setTokenName(arguments.tokenName);
+
+        // xii. TokenSymbol = tokenSymbol
+        state.setTokenSymbol(arguments.tokenSymbol);
+
+        // xiii. BaseURI = baseURI
+        state.setBaseURI(arguments.baseURI);
+        // xiv. TokenURIs = {}
+        //  initial state
     }
 }

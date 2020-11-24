@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public final class State {
@@ -58,14 +59,34 @@ public final class State {
         lock.unlock();
     }
 
+    public void setTokenName(@Nonnull String tokenName) {
+        this.tokenName = tokenName;
+    }
+
+    public void setTokenSymbol(@Nonnull String tokenSymbol) {
+        this.tokenSymbol = tokenSymbol;
+    }
+
+    public void setBaseURI(@Nonnull String baseURI) {
+        this.baseURI = baseURI;
+    }
+
     @Nullable
     public Instant getTimestamp() {
         return timestamp;
     }
 
+    public void setTimestamp(@Nonnull Instant timestamp) {
+        this.timestamp = timestamp;
+    }
+
     @Nullable
     public Address getOwner() {
         return owner;
+    }
+
+    public void setOwner(@Nonnull Address owner) {
+        this.owner = owner;
     }
 
     @Nullable

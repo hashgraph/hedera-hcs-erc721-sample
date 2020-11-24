@@ -37,7 +37,10 @@ public enum Status {
     TRANSFER_FROM_NOT_TOKEN_OWNER(11),
 
     /** TransferFrom where #to is not set. */
-    TRANSFER_TO_NOT_SET(12);
+    TRANSFER_TO_NOT_SET(12),
+
+    /** Constructor function called after the constructor has already been called. */
+    CONSTRUCTOR_ALREADY_CALLED(13);
 
     public final int value;
 
