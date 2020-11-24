@@ -31,7 +31,13 @@ public enum Status {
     MINT_TO_NOT_SET(9),
 
     /** Mint function where the token already exists. */
-    MINT_TOKEN_EXISTS(10);
+    MINT_TOKEN_EXISTS(10),
+
+    /** TransferFrom where #from does not hold the token. */
+    TRANSFER_FROM_NOT_TOKEN_OWNER(11),
+
+    /** TransferFrom where #to is not set. */
+    TRANSFER_TO_NOT_SET(12);
 
     public final int value;
 

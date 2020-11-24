@@ -120,6 +120,10 @@ public final class State {
         holderTokens.computeIfAbsent(to, v -> new HashSet<>()).add(tokenId);
     }
 
+    public void setTokenOwner(Int tokenId, Address to) {
+        tokenOwners.put(tokenId, to);
+    }
+
     public void removeToken(Int tokenId, Address from) {
         var tokenHolder = holderTokens.get(from);
 
