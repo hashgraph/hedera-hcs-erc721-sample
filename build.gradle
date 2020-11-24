@@ -53,9 +53,12 @@ allprojects {
 			removeUnusedImports()
 			prettier(['prettier': '2.2.0', 'prettier-plugin-java': '1.0.0']).config(['parser': 'java', 'tabWidth': 4])
 
-			// ignore proto/
-			targetExclude fileTree("${rootProject.projectDir}/proto/src/main/java") {
-				include "**/*.java"
+			targetExclude fileTree("${rootProject.projectDir}") {
+				// ignore proto/
+				include "proto/src/main/java/**/*.java"
+
+				// ignore .../db/
+				include "contract/src/main/java/com/hedera/hashgraph/seven_twenty_one/contract/db/**/*.java"
 			}
 		}
 		groovyGradle {

@@ -2,6 +2,8 @@ package com.hedera.hashgraph.seven_twenty_one.contract;
 
 import com.google.protobuf.ByteString;
 import com.hedera.hashgraph.sdk.*;
+import com.hedera.hashgraph.seven_twenty_one.contract.repository.AddressRepository;
+import com.hedera.hashgraph.seven_twenty_one.contract.repository.TransactionRepository;
 import com.hedera.hashgraph.seven_twenty_one.proto.ConstructorFunctionData;
 import com.hedera.hashgraph.seven_twenty_one.proto.Function;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
@@ -13,6 +15,12 @@ import java.util.Optional;
 import java.util.concurrent.TimeoutException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jooq.ConnectionProvider;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
+import org.jooq.impl.DataSourceConnectionProvider;
+import org.postgresql.ds.PGSimpleDataSource;
 
 public final class App {
 
@@ -31,11 +39,35 @@ public final class App {
     // topic ID of the contract instance
     final TopicId topicId = getOrCreateContractInstance();
 
+    final ConnectionProvider jooqConnectionProvider = createJOOQConnectionProvider();
+
+    final DSLContext jooqContext = DSL.using(
+        jooqConnectionProvider,
+        SQLDialect.POSTGRES
+    );
+
+    final AddressRepository addressRepository = new AddressRepository(
+        jooqContext
+    );
+
+    final TransactionRepository transactionRepository = new TransactionRepository(
+        jooqContext,
+        addressRepository
+    );
+
     // listener to the Hedera topic
     final TopicListener topicListener = new TopicListener(
         contractState,
         hederaClient,
-        topicId
+        topicId,
+        transactionRepository
+    );
+
+    // on an interval, we commit our state
+    final CommitInterval commitInterval = new CommitInterval(
+        env,
+        contractState,
+        transactionRepository
     );
 
     private App()
@@ -92,12 +124,28 @@ public final class App {
         var tokenName = requireEnv("H721_TOKEN_NAME");
         var tokenSymbol = requireEnv("H721_TOKEN_SYMBOL");
         var baseUri = env.get("H721_BASE_URI");
-        var operatorKey = PrivateKey.fromString(
-            requireEnv("H721_OPERATOR_KEY")
-        );
         var operatorId = Objects.requireNonNull(
             hederaClient.getOperatorAccountId()
         );
+
+        var ownerKey = Optional
+            .ofNullable(env.get("H721_OWNER_KEY"))
+            .map(PrivateKey::fromString)
+            .orElseGet(
+                () -> {
+                    var newKey = PrivateKey.generate();
+
+                    logger
+                        .always()
+                        .log(
+                            "No owner key provided; Generated, Private = {}, Public = {}",
+                            newKey,
+                            newKey.getPublicKey()
+                        );
+
+                    return newKey;
+                }
+            );
 
         // step 1 is to create a fresh topic to use
         // nothing specific here, might want to use a memo to call out what we are (h721)
@@ -130,13 +178,14 @@ public final class App {
 
         var functionBody = FunctionBody
             .newBuilder()
+            .setCaller(ByteString.copyFrom(ownerKey.getPublicKey().toBytes()))
             .setOperatorAccountNum(operatorId.num)
             .setValidStartNanos(validStartNanos)
             .setConstructor(functionData)
             .build();
 
         var functionBodyBytes = functionBody.toByteArray();
-        var functionSignature = operatorKey.sign(functionBodyBytes);
+        var functionSignature = ownerKey.sign(functionBodyBytes);
 
         var function = Function
             .newBuilder()
@@ -155,6 +204,19 @@ public final class App {
         logger.warn("Created new Topic {}", topicId);
 
         return topicId;
+    }
+
+    ConnectionProvider createJOOQConnectionProvider() {
+        var databaseUrl = requireEnv("H721_DATABASE_URL");
+        var databaseUsername = requireEnv("H721_DATABASE_USERNAME");
+        var databasePassword = env.get("H721_DATABASE_PASSWORD", "");
+
+        var dataSource = new PGSimpleDataSource();
+        dataSource.setUrl(databaseUrl);
+        dataSource.setUser(databaseUsername);
+        dataSource.setPassword(databasePassword);
+
+        return new DataSourceConnectionProvider(dataSource);
     }
 
     String requireEnv(String name) {
