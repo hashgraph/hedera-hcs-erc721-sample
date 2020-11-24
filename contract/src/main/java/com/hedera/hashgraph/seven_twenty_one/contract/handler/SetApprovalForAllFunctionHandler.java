@@ -25,7 +25,10 @@ public final class SetApprovalForAllFunctionHandler
         ensureNotNull(state.getOwner(), Status.CONSTRUCTOR_NOT_CALLED);
 
         // ii. caller != operator
-        ensure(!caller.equals(arguments.operator), Status.SET_APPROVAL_FOR_ALL_CALLER_IS_OPERATOR);
+        ensure(
+            !caller.equals(arguments.operator),
+            Status.SET_APPROVAL_FOR_ALL_CALLER_IS_OPERATOR
+        );
     }
 
     @Override
@@ -35,6 +38,10 @@ public final class SetApprovalForAllFunctionHandler
         SetApprovalForAllFunctionArguments arguments
     ) {
         // i. OperatorApprovals[caller][operator] = approved
-        state.setOperatorApproval(caller, arguments.operator, arguments.approved);
+        state.setOperatorApproval(
+            caller,
+            arguments.operator,
+            arguments.approved
+        );
     }
 }

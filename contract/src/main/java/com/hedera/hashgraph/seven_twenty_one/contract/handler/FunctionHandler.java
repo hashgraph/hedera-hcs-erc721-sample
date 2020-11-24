@@ -5,6 +5,7 @@ import com.hedera.hashgraph.seven_twenty_one.contract.State;
 import com.hedera.hashgraph.seven_twenty_one.contract.Status;
 import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
+import javax.annotation.Nullable;
 
 public abstract class FunctionHandler<ArgumentsT> {
 
@@ -22,13 +23,15 @@ public abstract class FunctionHandler<ArgumentsT> {
         ArgumentsT arguments
     );
 
-    protected void ensure(boolean condition, Status status) throws StatusException {
+    protected void ensure(boolean condition, Status status)
+        throws StatusException {
         if (!condition) {
             throw new StatusException(status);
         }
     }
 
-    protected <T> void ensureNotNull(T value, Status status) throws StatusException {
+    protected <T> void ensureNotNull(@Nullable T value, Status status)
+        throws StatusException {
         ensure(value != null, status);
     }
 }

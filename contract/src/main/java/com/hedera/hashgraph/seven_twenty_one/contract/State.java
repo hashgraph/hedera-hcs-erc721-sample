@@ -1,10 +1,7 @@
 package com.hedera.hashgraph.seven_twenty_one.contract;
 
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.Nullable;
@@ -84,16 +81,53 @@ public final class State {
 
     public boolean isOperatorApproved(Address caller, Int tokenId) {
         var operatorApproval = operatorApprovals.get(
-                Objects.requireNonNull(tokenOwners.get(tokenId)));
+            Objects.requireNonNull(tokenOwners.get(tokenId))
+        );
 
-        return operatorApproval != null && operatorApproval.getOrDefault(caller, false);
+        return (
+            operatorApproval != null &&
+            operatorApproval.getOrDefault(caller, false)
+        );
     }
 
     public void setTokenApproval(Int tokenId, Address spender) {
         tokenApprovals.put(tokenId, spender);
     }
 
-    public void setOperatorApproval(Address caller, Address operator, boolean approved) {
-        operatorApprovals.computeIfAbsent(caller, v -> new HashMap<>()).put(operator, approved);
+    public void clearTokenOwner(Int tokenId) {
+        tokenOwners.remove(tokenId);
+    }
+
+    public void clearTokenApproval(Int tokenId) {
+        tokenApprovals.remove(tokenId);
+    }
+
+    public void clearTokenURI(Int tokenId) {
+        tokenURIs.remove(tokenId);
+    }
+
+    public void setOperatorApproval(
+        Address caller,
+        Address operator,
+        boolean approved
+    ) {
+        operatorApprovals
+            .computeIfAbsent(caller, v -> new HashMap<>())
+            .put(operator, approved);
+    }
+
+    public void addToken(Int tokenId, Address to) {
+        holderTokens.computeIfAbsent(to, v -> new HashSet<>()).add(tokenId);
+    }
+
+    public void removeToken(Int tokenId, Address from) {
+        var tokenHolder = holderTokens.get(from);
+
+        if (tokenHolder == null) {
+            // address holds no tokens
+            return;
+        }
+
+        tokenHolder.remove(tokenId);
     }
 }

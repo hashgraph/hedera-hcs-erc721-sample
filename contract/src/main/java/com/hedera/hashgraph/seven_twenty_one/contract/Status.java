@@ -21,15 +21,17 @@ public enum Status {
     /** Any function asking to operate that is rejected because the caller is not the token owner or does not have some approval. */
     UNAUTHORIZED(6),
 
-    /** Approve function where the spender is the token owner. */
+    /** Approve function where #spender is the token owner. */
     APPROVE_SPENDER_IS_OWNER(7),
 
-    /** SetApprovalForAll function where the operator is the caller. */
+    /** SetApprovalForAll function where #operator is the caller. */
     SET_APPROVAL_FOR_ALL_CALLER_IS_OPERATOR(8),
 
+    /** Mint function where #to is not set.  */
+    MINT_TO_NOT_SET(9),
 
-
-    ;
+    /** Mint function where the token already exists. */
+    MINT_TOKEN_EXISTS(10);
 
     public final int value;
 

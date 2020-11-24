@@ -6,6 +6,7 @@ import com.hedera.hashgraph.seven_twenty_one.contract.Status;
 import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.ApproveFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
+import java.util.Objects;
 
 public final class ApproveFunctionHandler
     extends FunctionHandler<ApproveFunctionArguments> {
@@ -29,10 +30,17 @@ public final class ApproveFunctionHandler
         ensureNotNull(tokenOwner, Status.TOKEN_NOT_FOUND);
 
         // iii. caller = TokenOwners[id] || OperatorApprovals[TokenOwners[id]][caller]
-        ensure(caller.equals(tokenOwner) || state.isOperatorApproved(caller, arguments.id), Status.UNAUTHORIZED);
+        ensure(
+            Objects.equals(caller, tokenOwner) ||
+            state.isOperatorApproved(caller, arguments.id),
+            Status.UNAUTHORIZED
+        );
 
         // iv. spender != TokenOwners[id]
-        ensure(!arguments.spender.equals(tokenOwner), Status.APPROVE_SPENDER_IS_OWNER);
+        ensure(
+            !Objects.equals(arguments.spender, tokenOwner),
+            Status.APPROVE_SPENDER_IS_OWNER
+        );
     }
 
     @Override

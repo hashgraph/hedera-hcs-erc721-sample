@@ -84,7 +84,10 @@ public final class TopicListener {
         } catch (InvalidProtocolBufferException e) {
             // this is not a true error, someone submitted a protobuf that we don't understand
             // ignore the message
-            logger.warn("Ignoring invalid message at sequence " + topicMessage.sequenceNumber);
+            logger.warn(
+                "Ignoring invalid message at sequence " +
+                topicMessage.sequenceNumber
+            );
             return;
         }
 
