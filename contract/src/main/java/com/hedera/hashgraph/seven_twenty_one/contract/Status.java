@@ -24,6 +24,11 @@ public enum Status {
     /** Approve function where the spender is the token owner. */
     APPROVE_SPENDER_IS_OWNER(7),
 
+    /** SetApprovalForAll function where the operator is the caller. */
+    SET_APPROVAL_FOR_ALL_CALLER_IS_OPERATOR(8),
+
+
+
     ;
 
     public final int value;

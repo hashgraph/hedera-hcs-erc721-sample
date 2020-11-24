@@ -92,4 +92,8 @@ public final class State {
     public void setTokenApproval(Int tokenId, Address spender) {
         tokenApprovals.put(tokenId, spender);
     }
+
+    public void setOperatorApproval(Address caller, Address operator, boolean approved) {
+        operatorApprovals.computeIfAbsent(caller, v -> new HashMap<>()).put(operator, approved);
+    }
 }
