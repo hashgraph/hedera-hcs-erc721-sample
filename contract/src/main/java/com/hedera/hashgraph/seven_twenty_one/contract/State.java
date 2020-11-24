@@ -3,10 +3,16 @@ package com.hedera.hashgraph.seven_twenty_one.contract;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import javax.annotation.Nullable;
 
 public final class State {
+
+    // used to lock write access to state during state snapshot serialization
+    private final Lock lock = new ReentrantLock();
 
     // timestamp that this state was last updated
     // null = never updated
@@ -47,8 +53,43 @@ public final class State {
         tokenURIs = new HashMap<>();
     }
 
+    public void lock() {
+        lock.lock();
+    }
+
+    public void unlock() {
+        lock.unlock();
+    }
+
     @Nullable
     public Instant getTimestamp() {
         return timestamp;
+    }
+
+    @Nullable
+    public Address getOwner() {
+        return owner;
+    }
+
+    @Nullable
+    public Address getTokenOwner(Int tokenId) {
+        return tokenOwners.get(tokenId);
+    }
+
+    public boolean isApproved(Address caller, Int tokenId) {
+        var tokenApproval = tokenApprovals.get(tokenId);
+
+        return tokenApproval != null && tokenApproval.equals(caller);
+    }
+
+    public boolean isOperatorApproved(Address caller, Int tokenId) {
+        var operatorApproval = operatorApprovals.get(
+                Objects.requireNonNull(tokenOwners.get(tokenId)));
+
+        return operatorApproval != null && operatorApproval.getOrDefault(caller, false);
+    }
+
+    public void setTokenApproval(Int tokenId, Address spender) {
+        tokenApprovals.put(tokenId, spender);
     }
 }

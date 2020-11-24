@@ -2,6 +2,8 @@ package com.hedera.hashgraph.seven_twenty_one.contract.handler;
 
 import com.hedera.hashgraph.seven_twenty_one.contract.Address;
 import com.hedera.hashgraph.seven_twenty_one.contract.State;
+import com.hedera.hashgraph.seven_twenty_one.contract.Status;
+import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.ApproveFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
 
@@ -18,8 +20,19 @@ public final class ApproveFunctionHandler
         State state,
         Address caller,
         ApproveFunctionArguments arguments
-    ) {
-        throw new UnsupportedOperationException();
+    ) throws StatusException {
+        // i. Owner != 0
+        ensureNotNull(state.getOwner(), Status.CONSTRUCTOR_NOT_CALLED);
+
+        // ii. TokenOwners[id] != 0x
+        var tokenOwner = state.getTokenOwner(arguments.id);
+        ensureNotNull(tokenOwner, Status.TOKEN_NOT_FOUND);
+
+        // iii. caller = TokenOwners[id] || OperatorApprovals[TokenOwners[id]][caller]
+        ensure(caller.equals(tokenOwner) || state.isOperatorApproved(caller, arguments.id), Status.UNAUTHORIZED);
+
+        // iv. spender != TokenOwners[id]
+        ensure(!arguments.spender.equals(tokenOwner), Status.APPROVE_SPENDER_IS_OWNER);
     }
 
     @Override
@@ -28,6 +41,7 @@ public final class ApproveFunctionHandler
         Address caller,
         ApproveFunctionArguments arguments
     ) {
-        throw new UnsupportedOperationException();
+        // i. TokenApprovals[id] = spender
+        state.setTokenApproval(arguments.id, arguments.spender);
     }
 }

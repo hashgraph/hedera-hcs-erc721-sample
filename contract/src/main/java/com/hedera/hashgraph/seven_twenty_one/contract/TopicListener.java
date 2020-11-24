@@ -11,8 +11,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import javax.annotation.Nullable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-public class TopicListener {
+public final class TopicListener {
+
+    private static final Logger logger = LogManager.getLogger(
+        TopicListener.class
+    );
 
     // map of incoming function case to the handler that will accept
     private final Map<FunctionBody.DataCase, FunctionHandler<?>> functionHandlers = Collections.emptyMap();
@@ -42,6 +48,8 @@ public class TopicListener {
 
     public synchronized void startListening() {
         stopListening();
+
+        logger.info("Listening to Topic {}", hederaTopicId);
 
         hederaSubscriptionHandle =
             new TopicMessageQuery()
@@ -76,7 +84,7 @@ public class TopicListener {
         } catch (InvalidProtocolBufferException e) {
             // this is not a true error, someone submitted a protobuf that we don't understand
             // ignore the message
-            // TODO: log the failure as a warning
+            logger.warn("Ignoring invalid message at sequence " + topicMessage.sequenceNumber);
             return;
         }
 
@@ -91,7 +99,7 @@ public class TopicListener {
 
             // this is a protection against DUPLICATE transactions so we treat this as a true error
 
-            // FIXME: log this as an error
+            // TODO: throw new StatusException(Status.TRANSACTION_ID_MISMATCH);
             return;
         }
 
@@ -131,9 +139,24 @@ public class TopicListener {
 
         // validate the function arguments
         // this will raise an exception that we need to handle and produce a failed function result
-        functionHandler.validate(state, caller, functionArguments);
+        try {
+            functionHandler.validate(state, caller, functionArguments);
+        } catch (StatusException e) {
+            // FIXME: log this transaction as an error
+            return;
+        }
 
-        // finally, call the function
-        functionHandler.call(state, caller, functionArguments);
+        // acquire a lock to update our state
+        // we do this to block a snapshot from happening in the middle of
+        // a state update
+        state.lock();
+
+        try {
+            // finally, call the function
+            functionHandler.call(state, caller, functionArguments);
+        } finally {
+            // release our state lock so that a snapshot may now happen
+            state.unlock();
+        }
     }
 }
