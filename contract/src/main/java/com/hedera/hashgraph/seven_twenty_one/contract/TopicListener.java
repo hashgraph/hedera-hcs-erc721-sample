@@ -136,7 +136,17 @@ public final class TopicListener {
         var functionArguments = functionHandler.parse(functionBody);
 
         try {
-            if (!expectedTransactionId.equals(topicMessage.transactionId)) {
+            if (
+                !(
+                    expectedTransactionId.accountId.equals(
+                        Objects.requireNonNull(topicMessage.transactionId)
+                            .accountId
+                    ) &&
+                    expectedTransactionId.validStart.equals(
+                        topicMessage.transactionId.validStart
+                    )
+                )
+            ) {
                 // the transaction ID in the function body does not match the transaction ID that this
                 // function was submitted under
 

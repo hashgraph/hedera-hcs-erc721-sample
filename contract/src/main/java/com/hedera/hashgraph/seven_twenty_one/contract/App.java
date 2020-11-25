@@ -2,12 +2,18 @@ package com.hedera.hashgraph.seven_twenty_one.contract;
 
 import com.google.protobuf.ByteString;
 import com.hedera.hashgraph.sdk.*;
+import com.hedera.hashgraph.seven_twenty_one.contract.api.ApiVerticle;
 import com.hedera.hashgraph.seven_twenty_one.contract.repository.AddressRepository;
 import com.hedera.hashgraph.seven_twenty_one.contract.repository.TransactionRepository;
 import com.hedera.hashgraph.seven_twenty_one.proto.ConstructorFunctionData;
 import com.hedera.hashgraph.seven_twenty_one.proto.Function;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
 import io.github.cdimascio.dotenv.Dotenv;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Vertx;
+import io.vertx.pgclient.PgConnectOptions;
+import io.vertx.pgclient.PgPool;
+import io.vertx.sqlclient.PoolOptions;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
@@ -41,6 +47,8 @@ public final class App {
 
     final ConnectionProvider jooqConnectionProvider = createJOOQConnectionProvider();
 
+    final PgPool pgPool = createPgPool();
+
     final DSLContext jooqContext = DSL.using(
         jooqConnectionProvider,
         SQLDialect.POSTGRES
@@ -69,6 +77,8 @@ public final class App {
         contractState,
         transactionRepository
     );
+
+    final Vertx vertx = Vertx.vertx();
 
     private App()
         throws HederaReceiptStatusException, TimeoutException, HederaPreCheckStatusException {}
@@ -212,11 +222,21 @@ public final class App {
         var databasePassword = env.get("H721_DATABASE_PASSWORD", "");
 
         var dataSource = new PGSimpleDataSource();
-        dataSource.setUrl(databaseUrl);
+        dataSource.setUrl("jdbc:" + databaseUrl);
         dataSource.setUser(databaseUsername);
         dataSource.setPassword(databasePassword);
 
         return new DataSourceConnectionProvider(dataSource);
+    }
+
+    PgPool createPgPool() {
+        return PgPool.pool(
+            PgConnectOptions
+                .fromUri(requireEnv("H721_DATABASE_URL"))
+                .setUser(requireEnv("H721_DATABASE_USERNAME"))
+                .setPassword(env.get("H721_DATABASE_PASSWORD", "")),
+            new PoolOptions().setMaxSize(10)
+        );
     }
 
     String requireEnv(String name) {
@@ -224,6 +244,18 @@ public final class App {
             env.get(name),
             "missing environment variable: " + name
         );
+    }
+
+    void deployStateVerticle() {
+        var port = Integer.parseInt(env.get("H721_STATE_PORT", "9000"));
+        var deploymentOptions = new DeploymentOptions().setInstances(8);
+
+        vertx.deployVerticle(
+            () -> new ApiVerticle(contractState, port, pgPool),
+            deploymentOptions
+        );
+
+        logger.info("State API Listening on :{}", port);
     }
 
     public static void main(String[] args)
@@ -235,7 +267,7 @@ public final class App {
         app.topicListener.startListening();
 
         // expose the read-only API for the contract state
-        // app.deployStateVerticle();
+        app.deployStateVerticle();
 
         // wait while the APIs and the topic listener run in the background
         while (true) Thread.sleep(0);

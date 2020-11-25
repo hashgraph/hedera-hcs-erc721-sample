@@ -1,5 +1,11 @@
 package com.hedera.hashgraph.seven_twenty_one.contract;
 
+import static java.util.function.UnaryOperator.identity;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public enum Status {
     OK(0),
 
@@ -44,7 +50,16 @@ public enum Status {
 
     public final int value;
 
+    private static final Map<Integer, Status> possibleValues = Arrays
+        .stream(values())
+        .collect(Collectors.toMap(status -> status.value, identity()));
+
     private Status(int value) {
         this.value = value;
+    }
+
+    @SuppressWarnings("NullAway")
+    public static Status valueOf(int value) {
+        return possibleValues.get(value);
     }
 }

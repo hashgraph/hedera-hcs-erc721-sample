@@ -59,6 +59,18 @@ public final class State {
         lock.unlock();
     }
 
+    public String getTokenName() {
+        return this.tokenName;
+    }
+
+    public String getTokenSymbol() {
+        return this.tokenSymbol;
+    }
+
+    public String getBaseURI() {
+        return this.baseURI;
+    }
+
     public void setTokenName(@Nonnull String tokenName) {
         this.tokenName = tokenName;
     }
@@ -98,6 +110,11 @@ public final class State {
         var tokenApproval = tokenApprovals.get(tokenId);
 
         return tokenApproval != null && tokenApproval.equals(caller);
+    }
+
+    @Nullable
+    public Address getApproved(Int tokenId) {
+        return tokenApprovals.get(tokenId);
     }
 
     public boolean isOperatorApproved(Address caller, Int tokenId) {
@@ -154,5 +171,15 @@ public final class State {
         }
 
         tokenHolder.remove(tokenId);
+    }
+
+    public int getNumberOfTokenOwners() {
+        return tokenOwners.size();
+    }
+
+    public int balanceOf(Address address) {
+        var tokens = holderTokens.get(address);
+
+        return tokens == null ? 0 : tokens.size();
     }
 }
