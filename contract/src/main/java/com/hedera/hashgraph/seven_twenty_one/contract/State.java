@@ -182,4 +182,8 @@ public final class State {
 
         return tokens == null ? 0 : tokens.size();
     }
+
+    public Set<Int> getTokens(Address address) {
+        return holderTokens.getOrDefault(address, Collections.emptySet());
+    }
 }
