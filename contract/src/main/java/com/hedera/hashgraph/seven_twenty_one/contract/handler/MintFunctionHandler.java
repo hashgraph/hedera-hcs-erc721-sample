@@ -48,5 +48,8 @@ public final class MintFunctionHandler
         // i. HolderTokens[to]' = HolderTokens[to] + {id}
         //  Add id to the set
         state.addToken(arguments.id, arguments.to);
+
+        // ii. TokenOwners[id] = to
+        state.setTokenOwner(arguments.id, arguments.to);
     }
 }
