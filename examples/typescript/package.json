@@ -10,6 +10,7 @@
     "postinstall": "run-s compile:proto compile:proto_ts"
   },
   "devDependencies": {
+    "@types/yargs": "^15.0.10",
     "chalk": "^4.1.0",
     "escodegen": "^2.0.0",
     "espree": "^7.3.0",
@@ -29,6 +30,7 @@
     "@hashgraph/sdk": "2.0.6",
     "dotenv": "^8.2.0",
     "node-biginteger": "^0.0.10",
-    "protobufjs": "^6.10.2"
+    "protobufjs": "^6.10.2",
+    "yargs": "^16.1.1"
   }
 }

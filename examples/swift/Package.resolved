@@ -1,0 +1,52 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "BigInt",
+        "repositoryURL": "https://github.com/attaswift/BigInt.git",
+        "state": {
+          "branch": null,
+          "revision": "018a5925f60f9e0523edd261de394a0898fe95b7",
+          "version": "3.1.0"
+        }
+      },
+      {
+        "package": "Encoding",
+        "repositoryURL": "https://github.com/std-swift/Encoding.git",
+        "state": {
+          "branch": null,
+          "revision": "f04cfaf25d40bb04db4ebf3c5bc5664ad6ca5ff1",
+          "version": "3.0.0"
+        }
+      },
+      {
+        "package": "SipHash",
+        "repositoryURL": "https://github.com/attaswift/SipHash",
+        "state": {
+          "branch": null,
+          "revision": "e325083424688055363bbfcb7f1a440d7d7a1bae",
+          "version": "1.2.2"
+        }
+      },
+      {
+        "package": "SwiftProtobuf",
+        "repositoryURL": "https://github.com/apple/swift-protobuf.git",
+        "state": {
+          "branch": null,
+          "revision": "426bef0ddfdc6449b7bd1418baafad6bbc56110b",
+          "version": "1.13.0"
+        }
+      },
+      {
+        "package": "Sodium",
+        "repositoryURL": "https://github.com/jedisct1/swift-sodium.git",
+        "state": {
+          "branch": null,
+          "revision": "176745ddc4991b27f80c3c2637652eb33b5782eb",
+          "version": "0.9.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,12 @@
+# swift package init
+.DS_Store
+/.build
+/Packages
+/*.xcodeproj
+xcuserdata/
+
+# protoc
+*.pb.swift
+
+# local .env
+.env/
