@@ -5,21 +5,25 @@ import java.math.BigInteger;
 
 public final class Int {
 
-    public static final Int MAX = new Int(new BigInteger("2").pow(256));
+    public static final Int MAX = new Int(new BigInteger("2").pow(256), false);
 
-    public static final Int ZERO = new Int(BigInteger.ZERO);
+    public static final Int ZERO = new Int(BigInteger.ZERO, false);
 
     public final BigInteger value;
 
     public Int(BigInteger value) {
-        if (value.compareTo(MAX.value) > 0) {
+        this(value, true);
+    }
+
+    private Int(BigInteger value, boolean checked) {
+        if (checked && value.compareTo(MAX.value) > 0) {
             // this is *greater than* Int.MAX
             throw new IllegalArgumentException(
                 "integers must not exceed 2^256 or " + MAX
             );
         }
 
-        if (value.compareTo(ZERO.value) < 0) {
+        if (checked && value.compareTo(ZERO.value) < 0) {
             // this is *less than* zero
             throw new IllegalArgumentException(
                 "integers must not be less than zero"
