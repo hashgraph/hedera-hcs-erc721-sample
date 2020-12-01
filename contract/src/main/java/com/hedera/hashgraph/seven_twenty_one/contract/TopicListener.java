@@ -24,7 +24,7 @@ public final class TopicListener {
     // map of incoming function case to the handler that will accept
     private final Map<FunctionBody.DataCase, FunctionHandler<?>> functionHandlers = Map.ofEntries(
         Map.entry(
-            FunctionBody.DataCase.CONSTRUCTOR,
+            FunctionBody.DataCase.CONSTRUCT,
             new ConstructorFunctionHandler()
         ),
         Map.entry(FunctionBody.DataCase.APPROVE, new ApproveFunctionHandler()),

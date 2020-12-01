@@ -23,8 +23,8 @@ public final class ConstructorFunctionArguments {
     public static ConstructorFunctionArguments parse(
         FunctionBody functionBody
     ) {
-        assert functionBody.hasConstructor();
-        var data = functionBody.getConstructor();
+        assert functionBody.hasConstruct();
+        var data = functionBody.getConstruct();
 
         return new ConstructorFunctionArguments(
             data.getTokenName(),

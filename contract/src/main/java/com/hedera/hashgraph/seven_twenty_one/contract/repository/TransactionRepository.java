@@ -42,7 +42,7 @@ public class TransactionRepository {
         this.repositoryMap =
             Map.ofEntries(
                 Map.entry(
-                    FunctionBody.DataCase.CONSTRUCTOR,
+                    FunctionBody.DataCase.CONSTRUCT,
                     new ConstructorTransactionRepository(
                         context,
                         addressRepository

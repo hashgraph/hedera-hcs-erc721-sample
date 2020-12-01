@@ -22,7 +22,8 @@ message FunctionBody {
   uint64 validStartNanos = 3;
 
   oneof data {
-    ConstructorFunctionData constructor = 4;
+    // renamed from .constructor for compatibility with JS
+    ConstructorFunctionData construct = 4;
     ApproveFunctionData approve = 5;
     SetApprovalForAllFunctionData setApprovalForAll = 6;
     MintFunctionData mint = 7;

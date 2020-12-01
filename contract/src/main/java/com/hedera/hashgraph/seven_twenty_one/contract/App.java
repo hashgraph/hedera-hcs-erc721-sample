@@ -191,7 +191,7 @@ public final class App {
             .setCaller(ByteString.copyFrom(ownerKey.getPublicKey().toBytes()))
             .setOperatorAccountNum(operatorId.num)
             .setValidStartNanos(validStartNanos)
-            .setConstructor(functionData)
+            .setConstruct(functionData)
             .build();
 
         var functionBodyBytes = functionBody.toByteArray();
