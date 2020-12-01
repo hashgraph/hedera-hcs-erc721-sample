@@ -36,7 +36,7 @@ public final class CommitInterval {
                 // noinspection BusyWait
                 Thread.sleep(intervalMs);
             } catch (InterruptedException e) {
-                break;
+                continue;
             }
 
             state.lock();
@@ -44,7 +44,7 @@ public final class CommitInterval {
             try {
                 if (state.getTimestamp() == null) {
                     // nothing has happened (yet)
-                    return;
+                    continue;
                 }
 
                 if (
@@ -53,7 +53,7 @@ public final class CommitInterval {
                 ) {
                     // we just wrote this state
                     // nothing has been happening
-                    return;
+                    continue;
                 }
 
                 transactionRepository.execute();
