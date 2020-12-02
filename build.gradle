@@ -20,6 +20,8 @@ allprojects {
 
 	repositories {
 		jcenter()
+		mavenLocal()
+		mavenCentral()
 	}
 
 	dependencies {
