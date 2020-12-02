@@ -8,7 +8,7 @@ FROM gradle:6.7.1-jdk15 AS build
 COPY --chown=gradle:gradle . /src/h721
 
 # build project
-RUN cd /src/h721 && gradle build --no-daemon
+RUN cd /src/h721 && gradle --no-daemon contract:assemble -Dspotless.check.skip=true
 
 #
 # stage: run
