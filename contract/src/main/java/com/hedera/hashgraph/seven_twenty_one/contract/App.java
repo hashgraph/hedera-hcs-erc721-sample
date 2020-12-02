@@ -19,8 +19,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
+import javax.sql.DataSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.flywaydb.core.Flyway;
 import org.jooq.ConnectionProvider;
 import org.jooq.DSLContext;
 import org.jooq.SQLDialect;
@@ -45,7 +47,11 @@ public final class App {
     // topic ID of the contract instance
     final TopicId topicId = getOrCreateContractInstance();
 
-    final ConnectionProvider jooqConnectionProvider = createJOOQConnectionProvider();
+    final DataSource dataSource = createJDBCDataSource();
+
+    final ConnectionProvider jooqConnectionProvider = new DataSourceConnectionProvider(
+        dataSource
+    );
 
     final PgPool pgPool = createPgPool();
 
@@ -216,7 +222,7 @@ public final class App {
         return topicId;
     }
 
-    ConnectionProvider createJOOQConnectionProvider() {
+    DataSource createJDBCDataSource() {
         var databaseUrl = requireEnv("H721_DATABASE_URL");
         var databaseUsername = requireEnv("H721_DATABASE_USERNAME");
         var databasePassword = env.get("H721_DATABASE_PASSWORD", "");
@@ -226,7 +232,7 @@ public final class App {
         dataSource.setUser(databaseUsername);
         dataSource.setPassword(databasePassword);
 
-        return new DataSourceConnectionProvider(dataSource);
+        return dataSource;
     }
 
     PgPool createPgPool() {
@@ -258,9 +264,21 @@ public final class App {
         logger.info("State API Listening on :{}", port);
     }
 
+    void runMigrations() {
+        Flyway
+            .configure()
+            .dataSource(dataSource)
+            .locations("classpath:migrations")
+            .load()
+            .migrate();
+    }
+
     public static void main(String[] args)
         throws InterruptedException, HederaReceiptStatusException, TimeoutException, HederaPreCheckStatusException {
         var app = new App();
+
+        // run migrations for the persistence layer
+        app.runMigrations();
 
         // start listening to the contract instance (topic) on the Hedera
         // mirror node
