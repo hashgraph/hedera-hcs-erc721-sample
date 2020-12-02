@@ -7,9 +7,15 @@ import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.ApproveFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
 import java.util.Objects;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class ApproveFunctionHandler
     extends FunctionHandler<ApproveFunctionArguments> {
+
+    private static final Logger logger = LogManager.getLogger(
+        ApproveFunctionHandler.class.getName()
+    );
 
     @Override
     public ApproveFunctionArguments parse(FunctionBody functionBody) {
@@ -51,5 +57,15 @@ public final class ApproveFunctionHandler
     ) {
         // i. TokenApprovals[id] = spender
         state.setTokenApproval(arguments.id, arguments.spender);
+    }
+
+    @Override
+    public void log(Address caller, ApproveFunctionArguments arguments) {
+        logger.info(
+            "Approve caller: {}, spender: {}, token: {}",
+            caller,
+            arguments.spender,
+            arguments.id
+        );
     }
 }

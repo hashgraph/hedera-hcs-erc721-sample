@@ -7,9 +7,15 @@ import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.BurnFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
 import java.util.Objects;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class BurnFunctionHandler
     extends FunctionHandler<BurnFunctionArguments> {
+
+    private static final Logger logger = LogManager.getLogger(
+        BurnFunctionHandler.class.getName()
+    );
 
     @Override
     public BurnFunctionArguments parse(FunctionBody functionBody) {
@@ -52,5 +58,10 @@ public final class BurnFunctionHandler
 
         // iv. TokenURIs[id] = ""
         state.clearTokenURI(arguments.id);
+    }
+
+    @Override
+    public void log(Address caller, BurnFunctionArguments arguments) {
+        logger.info("Burn caller: {}, token: {}", caller, arguments.id);
     }
 }

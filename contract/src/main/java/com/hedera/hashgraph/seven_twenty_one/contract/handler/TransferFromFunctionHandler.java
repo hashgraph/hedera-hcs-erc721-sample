@@ -8,9 +8,15 @@ import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.TransferFromFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
 import java.util.Objects;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class TransferFromFunctionHandler
     extends FunctionHandler<TransferFromFunctionArguments> {
+
+    private static final Logger logger = LogManager.getLogger(
+        TransferFromFunctionHandler.class.getName()
+    );
 
     @Override
     public TransferFromFunctionArguments parse(FunctionBody functionBody) {
@@ -67,5 +73,16 @@ public final class TransferFromFunctionHandler
 
         // iv. TokenApprovals[id] = 0x
         state.clearTokenApproval(arguments.id);
+    }
+
+    @Override
+    public void log(Address caller, TransferFromFunctionArguments arguments) {
+        logger.info(
+            "TransferFrom caller: {}, from: {}, to: {}, token: {}",
+            caller,
+            arguments.from,
+            arguments.to,
+            arguments.id
+        );
     }
 }

@@ -185,8 +185,9 @@ public final class TopicListener {
             state.lock();
 
             try {
-                // finally, call the function
+                // finally, call the function (and log its operation for debugging)
                 functionHandler.call(state, caller, functionArguments);
+                functionHandler.log(caller, functionArguments);
             } finally {
                 // release our state lock so that a snapshot may now happen
                 state.unlock();

@@ -6,9 +6,15 @@ import com.hedera.hashgraph.seven_twenty_one.contract.Status;
 import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.ConstructorFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class ConstructorFunctionHandler
     extends FunctionHandler<ConstructorFunctionArguments> {
+
+    private static final Logger logger = LogManager.getLogger(
+            ConstructorFunctionHandler.class.getName()
+    );
 
     @Override
     public ConstructorFunctionArguments parse(FunctionBody functionBody) {
@@ -59,7 +65,19 @@ public final class ConstructorFunctionHandler
 
         // xiii. BaseURI = baseURI
         state.setBaseURI(arguments.baseURI);
+        //
         // xiv. TokenURIs = {}
         //  initial state
+    }
+
+    @Override
+    public void log(Address caller, ConstructorFunctionArguments arguments) {
+        logger.info(
+            "Constructor caller: {}, tokenName: {}, tokenSymbol: {}, baseURI: {}",
+            caller,
+            arguments.tokenName,
+            arguments.tokenSymbol,
+            arguments.baseURI
+        );
     }
 }

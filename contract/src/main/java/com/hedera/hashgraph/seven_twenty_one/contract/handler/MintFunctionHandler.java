@@ -7,9 +7,15 @@ import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.MintFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
 import java.util.Objects;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public final class MintFunctionHandler
     extends FunctionHandler<MintFunctionArguments> {
+
+    private static final Logger logger = LogManager.getLogger(
+        MintFunctionHandler.class.getName()
+    );
 
     @Override
     public MintFunctionArguments parse(FunctionBody functionBody) {
@@ -51,5 +57,15 @@ public final class MintFunctionHandler
 
         // ii. TokenOwners[id] = to
         state.setTokenOwner(arguments.id, arguments.to);
+    }
+
+    @Override
+    public void log(Address caller, MintFunctionArguments arguments) {
+        logger.info(
+            "Mint caller: {}, to: {}, token: {}",
+            caller,
+            arguments.to,
+            arguments.id
+        );
     }
 }
