@@ -13,7 +13,7 @@ public final class ConstructorFunctionHandler
     extends FunctionHandler<ConstructorFunctionArguments> {
 
     private static final Logger logger = LogManager.getLogger(
-            ConstructorFunctionHandler.class.getName()
+        ConstructorFunctionHandler.class.getName()
     );
 
     @Override
