@@ -48,12 +48,11 @@ public final class TopicListener {
 
     // the topic that we are listening to for function calls
     private final TopicId hederaTopicId;
+    private final TransactionRepository transactionRepository;
 
     // handle of the open subscription to the topic
     @Nullable
     private SubscriptionHandle hederaSubscriptionHandle;
-
-    private final TransactionRepository transactionRepository;
 
     public TopicListener(
         State state,
@@ -134,70 +133,90 @@ public final class TopicListener {
 
         // parse the function arguments from the protobuf data
         var functionArguments = functionHandler.parse(functionBody);
+        var isLocked = false;
 
         try {
-            if (
-                !(
-                    expectedTransactionId.accountId.equals(
-                        Objects.requireNonNull(topicMessage.transactionId)
-                            .accountId
-                    ) &&
-                    expectedTransactionId.validStart.equals(
-                        topicMessage.transactionId.validStart
-                    )
-                )
-            ) {
-                // the transaction ID in the function body does not match the transaction ID that this
-                // function was submitted under
-
-                // this is a protection against DUPLICATE transactions so we treat this as a true error
-                throw new StatusException(Status.TRANSACTION_ID_MISMATCH);
-            }
-
-            if (maybeCaller.isEmpty()) {
-                // caller address we not set, immediately invalid
-                throw new StatusException(Status.CALLER_NOT_SET);
-            }
-
-            var caller = maybeCaller.get();
-            var signature = function.getSignature().toByteArray();
-
-            // verify that the function body was signed by the declared caller
-            // this is protection against the integrity of the message and ensures that this is really tied with
-            // the caller
-
-            if (
-                !caller.publicKey.verify(
-                    function.getBody().toByteArray(),
-                    signature
-                )
-            ) {
-                throw new StatusException(Status.INVALID_SIGNATURE);
-            }
-
-            // validate the function arguments
-            // this will raise an exception that we need to handle and produce a failed function result
-            functionHandler.validate(state, caller, functionArguments);
-
-            // acquire a lock to update our state
-            // we do this to block a snapshot from happening in the middle of
-            // a state update
-            state.lock();
-
             try {
+                if (
+                    !(
+                        expectedTransactionId.accountId.equals(
+                            Objects.requireNonNull(topicMessage.transactionId)
+                                .accountId
+                        ) &&
+                        expectedTransactionId.validStart.equals(
+                            topicMessage.transactionId.validStart
+                        )
+                    )
+                ) {
+                    // the transaction ID in the function body does not match the transaction ID that this
+                    // function was submitted under
+
+                    // this is a protection against DUPLICATE transactions so we treat this as a true error
+                    throw new StatusException(Status.TRANSACTION_ID_MISMATCH);
+                }
+
+                if (maybeCaller.isEmpty()) {
+                    // caller address we not set, immediately invalid
+                    throw new StatusException(Status.CALLER_NOT_SET);
+                }
+
+                var caller = maybeCaller.get();
+                var signature = function.getSignature().toByteArray();
+
+                // verify that the function body was signed by the declared caller
+                // this is protection against the integrity of the message and ensures that this is really tied with
+                // the caller
+
+                if (
+                    !caller.publicKey.verify(
+                        function.getBody().toByteArray(),
+                        signature
+                    )
+                ) {
+                    throw new StatusException(Status.INVALID_SIGNATURE);
+                }
+
+                // validate the function arguments
+                // this will raise an exception that we need to handle and produce a failed function result
+                functionHandler.validate(state, caller, functionArguments);
+
+                // acquire a lock to update our state
+                // we do this to block a snapshot from happening in the middle of
+                // a state update
+                state.lock();
+                isLocked = true;
+
                 // finally, call the function (and log its operation for debugging)
                 functionHandler.call(state, caller, functionArguments);
                 functionHandler.log(caller, functionArguments);
-            } finally {
+            } catch (StatusException e) {
+                transactionStatus = e.status;
+            }
+
+            if (!isLocked) {
+                state.lock();
+                isLocked = true;
+            }
+
+            // state has now transitioned
+            state.setTimestamp(topicMessage.consensusTimestamp);
+
+            // push our function result
+            state.addFunctionResult(
+                Objects.requireNonNull(topicMessage.transactionId),
+                new FunctionResult(
+                    topicMessage.consensusTimestamp,
+                    maybeCaller.orElse(null),
+                    topicMessage.transactionId,
+                    transactionStatus
+                )
+            );
+        } finally {
+            if (isLocked) {
                 // release our state lock so that a snapshot may now happen
                 state.unlock();
             }
-        } catch (StatusException e) {
-            transactionStatus = e.status;
         }
-
-        // state has now transitioned
-        state.setTimestamp(topicMessage.consensusTimestamp);
 
         try {
             // persist the transaction to our database

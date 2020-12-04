@@ -1,6 +1,8 @@
 package com.hedera.hashgraph.seven_twenty_one.contract;
 
+import com.hedera.hashgraph.sdk.TransactionId;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -29,6 +31,10 @@ public final class State {
     private final Map<Address, Map<Address, Boolean>> operatorApprovals;
 
     private final Map<Int, String> tokenURIs;
+
+    private final Map<Tuple2<Long, Long>, FunctionResult> functionResults = new TreeMap<>(
+        Comparator.comparing(transactionId -> transactionId.second)
+    );
 
     // each Hedera contract has an owner
     @Nullable
@@ -185,5 +191,29 @@ public final class State {
 
     public Set<Int> getTokens(Address address) {
         return holderTokens.getOrDefault(address, Collections.emptySet());
+    }
+
+    public void addFunctionResult(
+        TransactionId transactionId,
+        FunctionResult functionResult
+    ) {
+        functionResults.putIfAbsent(
+            new Tuple2<>(
+                transactionId.accountId.num,
+                ChronoUnit.NANOS.between(
+                    Instant.EPOCH,
+                    transactionId.validStart
+                )
+            ),
+            functionResult
+        );
+    }
+
+    @Nullable
+    public FunctionResult getFunctionResult(
+        long accountNum,
+        long validStartNanos
+    ) {
+        return functionResults.get(new Tuple2<>(accountNum, validStartNanos));
     }
 }
