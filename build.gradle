@@ -68,3 +68,16 @@ allprojects {
 		}
 	}
 }
+
+tasks.withType(Test) {
+	useJUnitPlatform()
+
+	// this task will fail on the first failed test
+	failFast = true
+
+	// emit logs per passed or failed test
+	testLogging {
+		exceptionFormat = 'full'
+		events "passed", "skipped", "failed", "standardOut", "standardError"
+	}
+}

@@ -1,5 +1,6 @@
 package com.hedera.hashgraph.seven_twenty_one.contract;
 
+import com.google.errorprone.annotations.Var;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.hashgraph.sdk.*;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.*;
@@ -231,6 +232,47 @@ public final class TopicListener {
         } catch (SQLException e) {
             // re-raise as unchecked to propagate up and terminate the process
             throw new RuntimeException(e);
+        }
+    }
+
+    void handleFunction(Function function) throws InvalidProtocolBufferException {
+        var functionBody = FunctionBody.parseFrom(function.getBody());
+        var caller = new Address(PublicKey.fromBytes(functionBody.getCaller().toByteArray()));
+
+        // get a function handler that matches the data case
+        @SuppressWarnings("unchecked")
+        var functionHandler = Objects.requireNonNull(
+                (FunctionHandler<Object>) functionHandlers.get(
+                        functionBody.getDataCase()
+                )
+        );
+
+        // FIXME: This isn't going to ever be called currently
+        if (functionHandler == null) {
+            throw new RuntimeException("transaction handler not implemented for " + functionBody.getDataCase());
+        }
+
+        // parse the function arguments from the protobuf data
+        var functionArguments = functionHandler.parse(functionBody);
+
+        Status functionStatus;
+
+        try {
+            // FIXME: This isn't going to ever be called currently
+            if (caller == null) {
+                throw new StatusException(Status.CALLER_NOT_SET);
+            }
+
+            var signature = function.getSignature().toByteArray();
+
+            if(!caller.publicKey.verify(functionBody.toByteArray(), signature)) {
+                throw new StatusException(Status.INVALID_SIGNATURE);
+            }
+
+            functionHandler.call(state, caller, functionArguments);
+            functionStatus = Status.OK;
+        } catch (StatusException e) {
+            functionStatus = e.status;
         }
     }
 }

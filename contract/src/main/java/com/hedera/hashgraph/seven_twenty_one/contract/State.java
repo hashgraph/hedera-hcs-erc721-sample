@@ -216,4 +216,20 @@ public final class State {
     ) {
         return functionResults.get(new Tuple2<>(accountNum, validStartNanos));
     }
+
+    boolean isHolderTokensEmpty() { return holderTokens.isEmpty(); }
+
+    boolean isTokenOwnersEmpty() { return tokenOwners.isEmpty(); }
+
+    boolean isOperatorApprovalsEmpty() { return operatorApprovals.isEmpty(); }
+
+    boolean isTokenApprovalsEmpty() { return tokenApprovals.isEmpty(); }
+
+    boolean isTokenURIsEmpty() { return tokenURIs.isEmpty(); }
+
+    Address getTokenApprovals(Int tokenId) { return tokenApprovals.get(tokenId); }
+
+    String getTokenURIs(Int tokenId) { return tokenURIs.get(tokenId); }
+
+    boolean getOperatorApprovals(Address caller, Address operator) { return operatorApprovals.get(caller).get(operator); }
 }
