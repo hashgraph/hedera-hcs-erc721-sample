@@ -27,6 +27,12 @@ public class TransferFromTest {
         var callerAccount = AccountId.fromString("0.0.5005");
         var toKey = PrivateKey.generate();
         var toAddress = new Address(toKey.getPublicKey());
+        var spenderKey = PrivateKey.generate();
+        var spenderAddress = new Address(spenderKey.getPublicKey());
+        var spenderAccount = AccountId.fromString("0.0.5005");
+        var approvedKey = PrivateKey.generate();
+        var approvedAddress = new Address(approvedKey.getPublicKey());
+        var approvedAccount = AccountId.fromString("0.0.5005");
         var baseURI = "baseURI";
         var tokenId = new Int(BigInteger.valueOf(555));
 
@@ -160,6 +166,234 @@ public class TransferFromTest {
 
         var preHolderTokensTo = state.getTokens(toAddress);
         Set<Int> postHolderTokensTo = new HashSet<>(preHolderTokensTo);
+        postHolderTokensTo.add(tokenId);
+
+        // Update State
+        topicListener.handleFunction(transferFromFunction);
+
+
+        // Post-Check
+
+        // i. HolderTokens[from]’ = HolderTokens[from] \ {id}
+        Assertions.assertEquals(postHolderTokensFrom, state.getTokens(callerAddress));
+
+        // ii. HolderTokens[to]’ = HolderTokens[to] + {id}
+        Assertions.assertEquals(postHolderTokensTo, state.getTokens(toAddress));
+
+        // iii. TokenOwners[id] = to
+        Assertions.assertEquals(toAddress, state.getTokenOwner(tokenId));
+
+        // iv. TokenApprovals[id] = 0x
+        Assertions.assertNull(state.getTokenApprovals(tokenId));
+
+
+        // Test again with TokenApprovals[id] = caller
+        state = new State();
+        topicListener = new TopicListener(state, null, new TopicId(0), null);
+
+        var approveFunctionDataBuilder = ApproveFunctionData.newBuilder();
+
+        var approveFunctionData = approveFunctionDataBuilder
+                .setSpender(spenderAddress.toByteString())
+                .setId(ByteString.copyFrom(tokenId.value.toByteArray()))
+                .build();
+
+        var approveTransactionId = TransactionId.generate(callerAccount);
+        var approveValidStartNanos = ChronoUnit.NANOS.between(
+                Instant.EPOCH,
+                approveTransactionId.validStart
+        );
+
+        var approveFunctionBody = FunctionBody
+                .newBuilder()
+                .setCaller(ByteString.copyFrom(callerKey.getPublicKey().toBytes()))
+                .setOperatorAccountNum(callerAccount.num)
+                .setValidStartNanos(approveValidStartNanos)
+                .setApprove(approveFunctionData)
+                .build();
+
+        var approveFunctionBodyBytes = approveFunctionBody.toByteArray();
+        var approveFunctionSignature = callerKey.sign(approveFunctionBodyBytes);
+
+        var approveFunction = Function
+                .newBuilder()
+                .setBody(ByteString.copyFrom(approveFunctionBodyBytes))
+                .setSignature(ByteString.copyFrom(approveFunctionSignature))
+                .build();
+
+        // Construct before Pre-Check
+        topicListener.handleFunction(constructorFunction);
+        topicListener.handleFunction(mintFunction);
+        topicListener.handleFunction(approveFunction);
+
+        transferFromFunctionData = transferFromFunctionDataBuilder
+                .setId(ByteString.copyFrom(tokenId.value.toByteArray()))
+                .setFrom(callerAddress.toByteString())
+                .setTo(toAddress.toByteString())
+                .build();
+
+        transferFromTransactionId = TransactionId.generate(spenderAccount);
+        transferFromValidStartNanos = ChronoUnit.NANOS.between(
+                Instant.EPOCH,
+                transferFromTransactionId.validStart
+        );
+
+        transferFromFunctionBody = FunctionBody
+                .newBuilder()
+                .setCaller(ByteString.copyFrom(spenderKey.getPublicKey().toBytes()))
+                .setOperatorAccountNum(spenderAccount.num)
+                .setValidStartNanos(transferFromValidStartNanos)
+                .setTransferFrom(transferFromFunctionData)
+                .build();
+
+        transferFromFunctionBodyBytes = transferFromFunctionBody.toByteArray();
+        transferFromFunctionSignature = spenderKey.sign(transferFromFunctionBodyBytes);
+
+        transferFromFunction = Function
+                .newBuilder()
+                .setBody(ByteString.copyFrom(transferFromFunctionBodyBytes))
+                .setSignature(ByteString.copyFrom(transferFromFunctionSignature))
+                .build();
+
+        // Pre-Check
+
+        // i. Owner != 0x
+        Assertions.assertNotNull(state.getOwner());
+
+        // ii. TokenOwners[id] != 0x
+        Assertions.assertNotNull(state.getTokenOwner(tokenId));
+
+        // iii. TokenOwners[id] = caller || TokenApprovals[id] = caller ||
+        // OperatorApprovals[TokenOwners[id]][caller]
+        Assertions.assertEquals(spenderAddress, state.getTokenApprovals(tokenId));
+
+        // iv. TokenOwners[id] = from
+        Assertions.assertEquals(callerAddress, state.getTokenOwner(tokenId));
+
+        // v. to != 0x
+        Assertions.assertNotNull(toAddress);
+
+        // Prepare for post-check
+        preHolderTokensFrom = state.getTokens(toAddress);
+        postHolderTokensFrom = new HashSet<>(preHolderTokensFrom);
+        postHolderTokensFrom.remove(tokenId);
+
+        preHolderTokensTo = state.getTokens(toAddress);
+        postHolderTokensTo = new HashSet<>(preHolderTokensTo);
+        postHolderTokensTo.add(tokenId);
+
+        // Update State
+        topicListener.handleFunction(transferFromFunction);
+
+
+        // Post-Check
+
+        // i. HolderTokens[from]’ = HolderTokens[from] \ {id}
+        Assertions.assertEquals(postHolderTokensFrom, state.getTokens(callerAddress));
+
+        // ii. HolderTokens[to]’ = HolderTokens[to] + {id}
+        Assertions.assertEquals(postHolderTokensTo, state.getTokens(toAddress));
+
+        // iii. TokenOwners[id] = to
+        Assertions.assertEquals(toAddress, state.getTokenOwner(tokenId));
+
+        // iv. TokenApprovals[id] = 0x
+        Assertions.assertNull(state.getTokenApprovals(tokenId));
+
+
+        // Test again with TokenApprovals[id] = caller
+        state = new State();
+        topicListener = new TopicListener(state, null, new TopicId(0), null);
+
+        var setApprovalForAllFunctionDataBuilder = SetApprovalForAllFunctionData.newBuilder();
+
+        var setApprovalForAllFunctionData = setApprovalForAllFunctionDataBuilder
+                .setOperator(approvedAddress.toByteString())
+                .setApproved(true)
+                .build();
+
+        var setApprovalForAllTransactionId = TransactionId.generate(callerAccount);
+        var setApprovalForAllValidStartNanos = ChronoUnit.NANOS.between(
+                Instant.EPOCH,
+                setApprovalForAllTransactionId.validStart
+        );
+
+        var setApprovalForAllFunctionBody = FunctionBody
+                .newBuilder()
+                .setCaller(ByteString.copyFrom(callerKey.getPublicKey().toBytes()))
+                .setOperatorAccountNum(approvedAccount.num)
+                .setValidStartNanos(setApprovalForAllValidStartNanos)
+                .setSetApprovalForAll(setApprovalForAllFunctionData)
+                .build();
+
+        var setApprovalForAllFunctionBodyBytes = setApprovalForAllFunctionBody.toByteArray();
+        var setApprovalForAllFunctionSignature = callerKey.sign(setApprovalForAllFunctionBodyBytes);
+
+        var setApprovalForAllFunction = Function
+                .newBuilder()
+                .setBody(ByteString.copyFrom(setApprovalForAllFunctionBodyBytes))
+                .setSignature(ByteString.copyFrom(setApprovalForAllFunctionSignature))
+                .build();
+
+        // Construct before Pre-Check
+        topicListener.handleFunction(constructorFunction);
+        topicListener.handleFunction(mintFunction);
+        topicListener.handleFunction(setApprovalForAllFunction);
+
+        transferFromFunctionData = transferFromFunctionDataBuilder
+                .setId(ByteString.copyFrom(tokenId.value.toByteArray()))
+                .setFrom(callerAddress.toByteString())
+                .setTo(toAddress.toByteString())
+                .build();
+
+        transferFromTransactionId = TransactionId.generate(approvedAccount);
+        transferFromValidStartNanos = ChronoUnit.NANOS.between(
+                Instant.EPOCH,
+                transferFromTransactionId.validStart
+        );
+
+        transferFromFunctionBody = FunctionBody
+                .newBuilder()
+                .setCaller(ByteString.copyFrom(approvedKey.getPublicKey().toBytes()))
+                .setOperatorAccountNum(approvedAccount.num)
+                .setValidStartNanos(transferFromValidStartNanos)
+                .setTransferFrom(transferFromFunctionData)
+                .build();
+
+        transferFromFunctionBodyBytes = transferFromFunctionBody.toByteArray();
+        transferFromFunctionSignature = approvedKey.sign(transferFromFunctionBodyBytes);
+
+        transferFromFunction = Function
+                .newBuilder()
+                .setBody(ByteString.copyFrom(transferFromFunctionBodyBytes))
+                .setSignature(ByteString.copyFrom(transferFromFunctionSignature))
+                .build();
+
+        // Pre-Check
+
+        // i. Owner != 0x
+        Assertions.assertNotNull(state.getOwner());
+
+        // ii. TokenOwners[id] != 0x
+        Assertions.assertNotNull(state.getTokenOwner(tokenId));
+
+        // iii. TokenOwners[id] = caller || TokenApprovals[id] = caller ||
+        // OperatorApprovals[TokenOwners[id]][caller]
+        Assertions.assertTrue(state.getOperatorApprovals(state.getTokenOwner(tokenId), approvedAddress));
+
+        // iv. TokenOwners[id] = from
+        Assertions.assertEquals(callerAddress, state.getTokenOwner(tokenId));
+
+        // v. to != 0x
+        Assertions.assertNotNull(toAddress);
+
+        // Prepare for post-check
+        preHolderTokensFrom = state.getTokens(toAddress);
+        postHolderTokensFrom = new HashSet<>(preHolderTokensFrom);
+        postHolderTokensFrom.remove(tokenId);
+
+        preHolderTokensTo = state.getTokens(toAddress);
+        postHolderTokensTo = new HashSet<>(preHolderTokensTo);
         postHolderTokensTo.add(tokenId);
 
         // Update State

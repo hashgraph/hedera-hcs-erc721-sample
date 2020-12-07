@@ -24,6 +24,9 @@ public class ApproveTest {
         var toAccount = AccountId.fromString("0.0.5006");
         var spenderKey = PrivateKey.generate();
         var spenderAddress = new Address(spenderKey.getPublicKey());
+        var approvedKey = PrivateKey.generate();
+        var approvedAddress = new Address(approvedKey.getPublicKey());
+        var approvedAccount = AccountId.fromString("0.0.5006");
         var baseURI = "baseURI";
         var tokenId = new Int(BigInteger.valueOf(555));
 
@@ -142,6 +145,93 @@ public class ApproveTest {
         // iii. caller = TokenOwners[id] || OperatorApprovals[TokenOwners[id]][caller]
         // caller is toAddress for approve function in this case
         Assertions.assertEquals(state.getTokenOwner(tokenId), toAddress);
+
+        // iv. spender != TokenOwners[id]
+        Assertions.assertNotEquals(state.getTokenOwner(tokenId), spenderAddress);
+
+        // Update State
+        topicListener.handleFunction(approveFunction);
+
+
+        // Post-Check
+
+        // i. TokenApprovals[id] = spender
+        Assertions.assertEquals(spenderAddress, state.getTokenApprovals(tokenId));
+
+
+        // Test again for OperatorApprovals
+        state = new State();
+        topicListener = new TopicListener(state, null, new TopicId(0), null);
+
+        var setApprovalForAllFunctionDataBuilder = SetApprovalForAllFunctionData.newBuilder();
+
+        var setApprovalForAllFunctionData = setApprovalForAllFunctionDataBuilder
+                .setOperator(approvedAddress.toByteString())
+                .setApproved(true)
+                .build();
+
+        var setApprovalForAllTransactionId = TransactionId.generate(toAccount);
+        var setApprovalForAllValidStartNanos = ChronoUnit.NANOS.between(
+                Instant.EPOCH,
+                setApprovalForAllTransactionId.validStart
+        );
+
+        var setApprovalForAllFunctionBody = FunctionBody
+                .newBuilder()
+                .setCaller(ByteString.copyFrom(toKey.getPublicKey().toBytes()))
+                .setOperatorAccountNum(approvedAccount.num)
+                .setValidStartNanos(setApprovalForAllValidStartNanos)
+                .setSetApprovalForAll(setApprovalForAllFunctionData)
+                .build();
+
+        var setApprovalForAllFunctionBodyBytes = setApprovalForAllFunctionBody.toByteArray();
+        var setApprovalForAllFunctionSignature = toKey.sign(setApprovalForAllFunctionBodyBytes);
+
+        var setApprovalForAllFunction = Function
+                .newBuilder()
+                .setBody(ByteString.copyFrom(setApprovalForAllFunctionBodyBytes))
+                .setSignature(ByteString.copyFrom(setApprovalForAllFunctionSignature))
+                .build();
+
+        approveTransactionId = TransactionId.generate(toAccount);
+        approveValidStartNanos = ChronoUnit.NANOS.between(
+                Instant.EPOCH,
+                approveTransactionId.validStart
+        );
+
+        approveFunctionBody = FunctionBody
+                .newBuilder()
+                .setCaller(ByteString.copyFrom(approvedKey.getPublicKey().toBytes()))
+                .setOperatorAccountNum(approvedAccount.num)
+                .setValidStartNanos(approveValidStartNanos)
+                .setApprove(approveFunctionData)
+                .build();
+
+        approveFunctionBodyBytes = approveFunctionBody.toByteArray();
+        approveFunctionSignature = approvedKey.sign(approveFunctionBodyBytes);
+
+        approveFunction = Function
+                .newBuilder()
+                .setBody(ByteString.copyFrom(approveFunctionBodyBytes))
+                .setSignature(ByteString.copyFrom(approveFunctionSignature))
+                .build();
+
+        // Construct before Pre-Check
+        topicListener.handleFunction(constructorFunction);
+        topicListener.handleFunction(mintFunction);
+        topicListener.handleFunction(setApprovalForAllFunction);
+
+        // Pre-Check
+
+        // i. Owner != 0x
+        Assertions.assertNotNull(state.getOwner());
+
+        // ii. TokenOwners[id] != 0x
+        Assertions.assertNotNull(state.getTokenOwner(tokenId));
+
+        // iii. caller = TokenOwners[id] || OperatorApprovals[TokenOwners[id]][caller]
+        // caller is toAddress for approve function in this case
+        Assertions.assertTrue(state.getOperatorApprovals(state.getTokenOwner(tokenId), approvedAddress));
 
         // iv. spender != TokenOwners[id]
         Assertions.assertNotEquals(state.getTokenOwner(tokenId), spenderAddress);
