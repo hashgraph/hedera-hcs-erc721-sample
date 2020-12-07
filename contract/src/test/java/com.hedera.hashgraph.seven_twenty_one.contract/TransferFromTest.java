@@ -138,8 +138,8 @@ public class TransferFromTest {
                 .build();
 
         // Construct and mint before Pre-Check
-        topicListener.handleFunction(constructorFunction);
-        topicListener.handleFunction(mintFunction);
+        topicListener.handleFunction(constructorFunction, Instant.ofEpochMilli(constructorValidStartNanos), constructorTransactionId);
+        topicListener.handleFunction(mintFunction, Instant.ofEpochMilli(mintValidStartNanos), mintTransactionId);
 
         // Pre-Check
 
@@ -169,7 +169,7 @@ public class TransferFromTest {
         postHolderTokensTo.add(tokenId);
 
         // Update State
-        topicListener.handleFunction(transferFromFunction);
+        topicListener.handleFunction(transferFromFunction, Instant.ofEpochMilli(transferFromValidStartNanos), transferFromTransactionId);
 
 
         // Post-Check
@@ -222,9 +222,9 @@ public class TransferFromTest {
                 .build();
 
         // Construct before Pre-Check
-        topicListener.handleFunction(constructorFunction);
-        topicListener.handleFunction(mintFunction);
-        topicListener.handleFunction(approveFunction);
+        topicListener.handleFunction(constructorFunction, Instant.ofEpochMilli(constructorValidStartNanos), constructorTransactionId);
+        topicListener.handleFunction(mintFunction, Instant.ofEpochMilli(mintValidStartNanos), mintTransactionId);
+        topicListener.handleFunction(approveFunction, Instant.ofEpochMilli(approveValidStartNanos), approveTransactionId);
 
         transferFromFunctionData = transferFromFunctionDataBuilder
                 .setId(ByteString.copyFrom(tokenId.value.toByteArray()))
@@ -283,7 +283,7 @@ public class TransferFromTest {
         postHolderTokensTo.add(tokenId);
 
         // Update State
-        topicListener.handleFunction(transferFromFunction);
+        topicListener.handleFunction(transferFromFunction, Instant.ofEpochMilli(transferFromValidStartNanos), transferFromTransactionId);
 
 
         // Post-Check
@@ -336,9 +336,9 @@ public class TransferFromTest {
                 .build();
 
         // Construct before Pre-Check
-        topicListener.handleFunction(constructorFunction);
-        topicListener.handleFunction(mintFunction);
-        topicListener.handleFunction(setApprovalForAllFunction);
+        topicListener.handleFunction(constructorFunction, Instant.ofEpochMilli(constructorValidStartNanos), constructorTransactionId);
+        topicListener.handleFunction(mintFunction, Instant.ofEpochMilli(mintValidStartNanos), mintTransactionId);
+        topicListener.handleFunction(setApprovalForAllFunction, Instant.ofEpochMilli(setApprovalForAllValidStartNanos), setApprovalForAllTransactionId);
 
         transferFromFunctionData = transferFromFunctionDataBuilder
                 .setId(ByteString.copyFrom(tokenId.value.toByteArray()))
@@ -397,7 +397,7 @@ public class TransferFromTest {
         postHolderTokensTo.add(tokenId);
 
         // Update State
-        topicListener.handleFunction(transferFromFunction);
+        topicListener.handleFunction(transferFromFunction, Instant.ofEpochMilli(transferFromValidStartNanos), transferFromTransactionId);
 
 
         // Post-Check

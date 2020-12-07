@@ -131,8 +131,8 @@ public class ApproveTest {
                 .build();
 
         // Construct before Pre-Check
-        topicListener.handleFunction(constructorFunction);
-        topicListener.handleFunction(mintFunction);
+        topicListener.handleFunction(constructorFunction, Instant.ofEpochMilli(constructorValidStartNanos), constructorTransactionId);
+        topicListener.handleFunction(mintFunction, Instant.ofEpochMilli(mintValidStartNanos), mintTransactionId);
 
         // Pre-Check
 
@@ -150,7 +150,7 @@ public class ApproveTest {
         Assertions.assertNotEquals(state.getTokenOwner(tokenId), spenderAddress);
 
         // Update State
-        topicListener.handleFunction(approveFunction);
+        topicListener.handleFunction(approveFunction, Instant.ofEpochMilli(approveValidStartNanos), approveTransactionId);
 
 
         // Post-Check
@@ -217,9 +217,9 @@ public class ApproveTest {
                 .build();
 
         // Construct before Pre-Check
-        topicListener.handleFunction(constructorFunction);
-        topicListener.handleFunction(mintFunction);
-        topicListener.handleFunction(setApprovalForAllFunction);
+        topicListener.handleFunction(constructorFunction, Instant.ofEpochMilli(constructorValidStartNanos), constructorTransactionId);
+        topicListener.handleFunction(mintFunction, Instant.ofEpochMilli(mintValidStartNanos), mintTransactionId);
+        topicListener.handleFunction(setApprovalForAllFunction, Instant.ofEpochMilli(setApprovalForAllValidStartNanos), setApprovalForAllTransactionId);
 
         // Pre-Check
 
@@ -237,7 +237,7 @@ public class ApproveTest {
         Assertions.assertNotEquals(state.getTokenOwner(tokenId), spenderAddress);
 
         // Update State
-        topicListener.handleFunction(approveFunction);
+        topicListener.handleFunction(approveFunction, Instant.ofEpochMilli(approveValidStartNanos), approveTransactionId);
 
 
         // Post-Check

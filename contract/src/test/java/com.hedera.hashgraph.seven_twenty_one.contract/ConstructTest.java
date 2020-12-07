@@ -71,7 +71,7 @@ public class ConstructTest {
 
 
         // Update State
-        topicListener.handleFunction(constructorFunction);
+        topicListener.handleFunction(constructorFunction, Instant.ofEpochMilli(validStartNanos), transactionId);
 
 
         // Post-Check

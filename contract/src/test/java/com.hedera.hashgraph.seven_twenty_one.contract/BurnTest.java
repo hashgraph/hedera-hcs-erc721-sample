@@ -130,8 +130,8 @@ public class BurnTest {
                 .build();
 
         // Construct before Pre-Check
-        topicListener.handleFunction(constructorFunction);
-        topicListener.handleFunction(mintFunction);
+        topicListener.handleFunction(constructorFunction, Instant.ofEpochMilli(constructorValidStartNanos), constructorTransactionId);
+        topicListener.handleFunction(mintFunction, Instant.ofEpochMilli(mintValidStartNanos), mintTransactionId);
 
         // Pre-Check
 
@@ -151,7 +151,7 @@ public class BurnTest {
         postHolderTokens.remove(tokenId);
 
         // Update State
-        topicListener.handleFunction(burnFunction);
+        topicListener.handleFunction(burnFunction, Instant.ofEpochMilli(burnValidStartNanos), burnTransactionId);
 
 
         // Post-Check

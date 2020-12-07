@@ -97,11 +97,11 @@ public final class TopicListener {
         // from the contents of the message on the topic
 
         Function function;
-        FunctionBody functionBody;
+        Instant consensusTimestamp = topicMessage.consensusTimestamp;
+        TransactionId transactionId = topicMessage.transactionId;
 
         try {
             function = Function.parseFrom(topicMessage.contents);
-            functionBody = FunctionBody.parseFrom(function.getBody());
         } catch (InvalidProtocolBufferException e) {
             // this is not a true error, someone submitted a protobuf that we don't understand
             // ignore the message
@@ -112,24 +112,41 @@ public final class TopicListener {
             return;
         }
 
+        try {
+            handleFunction(function, consensusTimestamp, transactionId);
+        }
+        catch (InvalidProtocolBufferException e) {
+            // this is not a true error, someone submitted a protobuf that we don't understand
+            // ignore the message
+            logger.warn(
+                    "Ignoring invalid message at sequence " +
+                            topicMessage.sequenceNumber
+            );
+            return;
+        }
+    }
+
+    void handleFunction(Function function, Instant consensusTimestamp, TransactionId transactionId) throws InvalidProtocolBufferException {
+        var functionBody = FunctionBody.parseFrom(function.getBody());
+
         var expectedTransactionId = new TransactionId(
-            new AccountId(functionBody.getOperatorAccountNum()),
-            Instant.ofEpochSecond(0, functionBody.getValidStartNanos())
+                new AccountId(functionBody.getOperatorAccountNum()),
+                Instant.ofEpochSecond(0, functionBody.getValidStartNanos())
         );
 
         var transactionStatus = Status.OK;
         var functionCaller = functionBody.getCaller();
 
         var maybeCaller = Optional
-            .ofNullable(functionCaller.isEmpty() ? null : functionCaller)
-            .map(Address::fromByteString);
+                .ofNullable(functionCaller.isEmpty() ? null : functionCaller)
+                .map(Address::fromByteString);
 
         // get a function handler that matches the data case
         @SuppressWarnings("unchecked")
         var functionHandler = Objects.requireNonNull(
-            (FunctionHandler<Object>) functionHandlers.get(
-                functionBody.getDataCase()
-            )
+                (FunctionHandler<Object>) functionHandlers.get(
+                        functionBody.getDataCase()
+                )
         );
 
         // parse the function arguments from the protobuf data
@@ -139,15 +156,15 @@ public final class TopicListener {
         try {
             try {
                 if (
-                    !(
-                        expectedTransactionId.accountId.equals(
-                            Objects.requireNonNull(topicMessage.transactionId)
-                                .accountId
-                        ) &&
-                        expectedTransactionId.validStart.equals(
-                            topicMessage.transactionId.validStart
+                        !(
+                                expectedTransactionId.accountId.equals(
+                                        Objects.requireNonNull(transactionId)
+                                                .accountId
+                                ) &&
+                                        expectedTransactionId.validStart.equals(
+                                                transactionId.validStart
+                                        )
                         )
-                    )
                 ) {
                     // the transaction ID in the function body does not match the transaction ID that this
                     // function was submitted under
@@ -169,10 +186,10 @@ public final class TopicListener {
                 // the caller
 
                 if (
-                    !caller.publicKey.verify(
-                        function.getBody().toByteArray(),
-                        signature
-                    )
+                        !caller.publicKey.verify(
+                                function.getBody().toByteArray(),
+                                signature
+                        )
                 ) {
                     throw new StatusException(Status.INVALID_SIGNATURE);
                 }
@@ -200,17 +217,17 @@ public final class TopicListener {
             }
 
             // state has now transitioned
-            state.setTimestamp(topicMessage.consensusTimestamp);
+            state.setTimestamp(consensusTimestamp);
 
             // push our function result
             state.addFunctionResult(
-                Objects.requireNonNull(topicMessage.transactionId),
-                new FunctionResult(
-                    topicMessage.consensusTimestamp,
-                    maybeCaller.orElse(null),
-                    topicMessage.transactionId,
-                    transactionStatus
-                )
+                    Objects.requireNonNull(transactionId),
+                    new FunctionResult(
+                            consensusTimestamp,
+                            maybeCaller.orElse(null),
+                            transactionId,
+                            transactionStatus
+                    )
             );
         } finally {
             if (isLocked) {
@@ -219,60 +236,21 @@ public final class TopicListener {
             }
         }
 
-        try {
-            // persist the transaction to our database
-            transactionRepository.put(
-                topicMessage.consensusTimestamp,
-                maybeCaller.orElse(null),
-                topicMessage.transactionId,
-                transactionStatus,
-                functionBody.getDataCase(),
-                functionArguments
-            );
-        } catch (SQLException e) {
-            // re-raise as unchecked to propagate up and terminate the process
-            throw new RuntimeException(e);
-        }
-    }
-
-    void handleFunction(Function function) throws InvalidProtocolBufferException {
-        var functionBody = FunctionBody.parseFrom(function.getBody());
-        var caller = new Address(PublicKey.fromBytes(functionBody.getCaller().toByteArray()));
-
-        // get a function handler that matches the data case
-        @SuppressWarnings("unchecked")
-        var functionHandler = Objects.requireNonNull(
-                (FunctionHandler<Object>) functionHandlers.get(
-                        functionBody.getDataCase()
-                )
-        );
-
-        // FIXME: This isn't going to ever be called currently
-        if (functionHandler == null) {
-            throw new RuntimeException("transaction handler not implemented for " + functionBody.getDataCase());
-        }
-
-        // parse the function arguments from the protobuf data
-        var functionArguments = functionHandler.parse(functionBody);
-
-        Status functionStatus;
-
-        try {
-            // FIXME: This isn't going to ever be called currently
-            if (caller == null) {
-                throw new StatusException(Status.CALLER_NOT_SET);
+        if (transactionRepository != null) {
+            try {
+                // persist the transaction to our database
+                transactionRepository.put(
+                        consensusTimestamp,
+                        maybeCaller.orElse(null),
+                        transactionId,
+                        transactionStatus,
+                        functionBody.getDataCase(),
+                        functionArguments
+                );
+            } catch (SQLException e) {
+                // re-raise as unchecked to propagate up and terminate the process
+                throw new RuntimeException(e);
             }
-
-            var signature = function.getSignature().toByteArray();
-
-            if(!caller.publicKey.verify(functionBody.toByteArray(), signature)) {
-                throw new StatusException(Status.INVALID_SIGNATURE);
-            }
-
-            functionHandler.call(state, caller, functionArguments);
-            functionStatus = Status.OK;
-        } catch (StatusException e) {
-            functionStatus = e.status;
         }
     }
 }

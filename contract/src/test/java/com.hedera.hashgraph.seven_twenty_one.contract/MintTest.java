@@ -102,7 +102,7 @@ public class MintTest {
                 .build();
 
         // Construct before Pre-Check
-        topicListener.handleFunction(constructorFunction);
+        topicListener.handleFunction(constructorFunction, Instant.ofEpochMilli(constructorValidStartNanos), constructorTransactionId);
 
         // Pre-Check
 
@@ -121,7 +121,7 @@ public class MintTest {
         postHolderTokens.add(tokenId);
 
         // Update State
-        topicListener.handleFunction(mintFunction);
+        topicListener.handleFunction(mintFunction, Instant.ofEpochMilli(mintValidStartNanos), mintTransactionId);
 
 
         // Post-Check

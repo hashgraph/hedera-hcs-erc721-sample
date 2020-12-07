@@ -129,8 +129,8 @@ public class SetApprovalForAllTest {
                 .build();
 
         // Construct before Pre-Check
-        topicListener.handleFunction(constructorFunction);
-        topicListener.handleFunction(mintFunction);
+        topicListener.handleFunction(constructorFunction, Instant.ofEpochMilli(constructorValidStartNanos), constructorTransactionId);
+        topicListener.handleFunction(mintFunction, Instant.ofEpochMilli(mintValidStartNanos), mintTransactionId);
 
         // Pre-Check
 
@@ -141,7 +141,7 @@ public class SetApprovalForAllTest {
         Assertions.assertNotEquals(toAddress, callerAddress);
 
         // Update State
-        topicListener.handleFunction(setApprovalForAllFunction);
+        topicListener.handleFunction(setApprovalForAllFunction, Instant.ofEpochMilli(setApprovalForAllValidStartNanos), setApprovalForAllTransactionId);
 
 
         // Post-Check
