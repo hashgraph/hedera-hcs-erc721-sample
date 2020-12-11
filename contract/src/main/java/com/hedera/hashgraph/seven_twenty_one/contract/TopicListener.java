@@ -102,27 +102,14 @@ public final class TopicListener {
 
         try {
             function = Function.parseFrom(topicMessage.contents);
+            handleFunction(function, consensusTimestamp, transactionId);
         } catch (InvalidProtocolBufferException e) {
             // this is not a true error, someone submitted a protobuf that we don't understand
             // ignore the message
             logger.warn(
                 "Ignoring invalid message at sequence " +
-                topicMessage.sequenceNumber
+                    topicMessage.sequenceNumber
             );
-            return;
-        }
-
-        try {
-            handleFunction(function, consensusTimestamp, transactionId);
-        }
-        catch (InvalidProtocolBufferException e) {
-            // this is not a true error, someone submitted a protobuf that we don't understand
-            // ignore the message
-            logger.warn(
-                    "Ignoring invalid message at sequence " +
-                            topicMessage.sequenceNumber
-            );
-            return;
         }
     }
 

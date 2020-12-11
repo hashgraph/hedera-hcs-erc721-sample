@@ -217,19 +217,27 @@ public final class State {
         return functionResults.get(new Tuple2<>(accountNum, validStartNanos));
     }
 
+    // Visible for testing
     boolean isHolderTokensEmpty() { return holderTokens.isEmpty(); }
 
+    // Visible for testing
     boolean isTokenOwnersEmpty() { return tokenOwners.isEmpty(); }
 
+    // Visible for testing
     boolean isOperatorApprovalsEmpty() { return operatorApprovals.isEmpty(); }
 
+    // Visible for testing
     boolean isTokenApprovalsEmpty() { return tokenApprovals.isEmpty(); }
 
+    // Visible for testing
     boolean isTokenURIsEmpty() { return tokenURIs.isEmpty(); }
 
+    // Visible for testing
     Address getTokenApprovals(Int tokenId) { return tokenApprovals.get(tokenId); }
 
+    // Visible for testing
     String getTokenURIs(Int tokenId) { return tokenURIs.get(tokenId); }
 
+    // Visible for testing
     boolean getOperatorApprovals(Address caller, Address operator) { return operatorApprovals.get(caller).get(operator); }
 }
