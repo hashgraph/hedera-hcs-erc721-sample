@@ -1,39 +1,32 @@
 package com.hedera.hashgraph.seven_twenty_one.contract.api;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import com.google.common.io.CharStreams;
 import com.hedera.hashgraph.seven_twenty_one.contract.Status;
-import com.hedera.hashgraph.seven_twenty_one.contract.handler.TransferFromFunctionHandler;
 import io.vertx.core.Handler;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.Tuple;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.sql.PreparedStatement;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class SpecificTransactionHandler implements Handler<RoutingContext> {
 
     private final PgPool pgPool;
 
     private final String sql = CharStreams.toString(
-            new InputStreamReader(
-                    Objects.requireNonNull(
-                            TransactionHandler.class.getClassLoader()
-                                    .getResourceAsStream("queries/specific-transaction.sql")
-                    ),
-                    UTF_8
-            )
+        new InputStreamReader(
+            Objects.requireNonNull(
+                TransactionHandler.class.getClassLoader()
+                    .getResourceAsStream("queries/specific-transaction.sql")
+            ),
+            UTF_8
+        )
     );
 
     SpecificTransactionHandler(PgPool pgPool) throws IOException {
@@ -53,11 +46,11 @@ public class SpecificTransactionHandler implements Handler<RoutingContext> {
     @Override
     public void handle(RoutingContext routingContext) {
         var operatorAccountNum = Long.parseLong(
-                routingContext.request().getParam("operatorAccountNum")
+            routingContext.request().getParam("operatorAccountNum")
         );
 
         var validStartNanos = Long.parseLong(
-                routingContext.request().getParam("validStartNanos")
+            routingContext.request().getParam("validStartNanos")
         );
 
         try {
@@ -76,7 +69,9 @@ public class SpecificTransactionHandler implements Handler<RoutingContext> {
 
                         try {
                             for (var row : rows) {
-                                System.out.println("Row: " + row.deepToString());
+                                System.out.println(
+                                    "Row: " + row.deepToString()
+                                );
                                 item.caller = row.getString("caller");
                                 item.consensusAt =
                                     Instant.ofEpochSecond(
