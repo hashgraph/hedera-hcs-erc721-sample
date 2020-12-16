@@ -56,8 +56,10 @@ public class ApiVerticle extends AbstractVerticle {
         router.get("/account/:address").handler(new AddressHandler(state));
 
         router
-            .get("/transaction/:operatorAccountNum/:validStartNanos")
+            .get("/transaction/:operatorAccountNum/:validStartNanos/receipt")
             .handler(new FunctionResultHandler(state));
+
+        router.get("/transaction/:operatorAccountNum/:validStartNanos").handler(new SpecificTransactionHandler(pgPool));
 
         router.get("/transaction").handler(new TransactionHandler(pgPool));
         router
