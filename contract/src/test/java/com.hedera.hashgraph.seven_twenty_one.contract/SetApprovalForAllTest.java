@@ -7,16 +7,21 @@ import com.hedera.hashgraph.sdk.PrivateKey;
 import com.hedera.hashgraph.sdk.TopicId;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.seven_twenty_one.proto.*;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
-
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class SetApprovalForAllTest {
+
     State state = new State();
-    TopicListener topicListener = new TopicListener(state, null, new TopicId(0), null);
+    TopicListener topicListener = new TopicListener(
+        state,
+        null,
+        new TopicId(0),
+        null
+    );
 
     @Test
     public void mintTest() throws InvalidProtocolBufferException {
@@ -36,101 +41,117 @@ public class SetApprovalForAllTest {
         var constructorFunctionDataBuilder = ConstructorFunctionData.newBuilder();
 
         var constructorFunctionData = constructorFunctionDataBuilder
-                .setTokenName(tokenName)
-                .setTokenSymbol(tokenSymbol)
-                .setBaseURI(baseURI)
-                .build();
+            .setTokenName(tokenName)
+            .setTokenSymbol(tokenSymbol)
+            .setBaseURI(baseURI)
+            .build();
 
         var constructorTransactionId = TransactionId.generate(callerAccount);
         var constructorValidStartNanos = ChronoUnit.NANOS.between(
-                Instant.EPOCH,
-                constructorTransactionId.validStart
+            Instant.EPOCH,
+            constructorTransactionId.validStart
         );
 
         var constructorFunctionBody = FunctionBody
-                .newBuilder()
-                .setCaller(ByteString.copyFrom(callerKey.getPublicKey().toBytes()))
-                .setOperatorAccountNum(callerAccount.num)
-                .setValidStartNanos(constructorValidStartNanos)
-                .setConstruct(constructorFunctionData)
-                .build();
+            .newBuilder()
+            .setCaller(ByteString.copyFrom(callerKey.getPublicKey().toBytes()))
+            .setOperatorAccountNum(callerAccount.num)
+            .setValidStartNanos(constructorValidStartNanos)
+            .setConstruct(constructorFunctionData)
+            .build();
 
         var constructorFunctionBodyBytes = constructorFunctionBody.toByteArray();
-        var constructorFunctionSignature = callerKey.sign(constructorFunctionBodyBytes);
+        var constructorFunctionSignature = callerKey.sign(
+            constructorFunctionBodyBytes
+        );
 
         var constructorFunction = Function
-                .newBuilder()
-                .setBody(ByteString.copyFrom(constructorFunctionBodyBytes))
-                .setSignature(ByteString.copyFrom(constructorFunctionSignature))
-                .build();
+            .newBuilder()
+            .setBody(ByteString.copyFrom(constructorFunctionBodyBytes))
+            .setSignature(ByteString.copyFrom(constructorFunctionSignature))
+            .build();
 
         // Build mint function
 
         var mintFunctionDataBuilder = MintFunctionData.newBuilder();
 
         var mintFunctionData = mintFunctionDataBuilder
-                .setId(ByteString.copyFrom(tokenId.value.toByteArray()))
-                .setTo(toAddress.toByteString())
-                .build();
+            .setId(ByteString.copyFrom(tokenId.value.toByteArray()))
+            .setTo(toAddress.toByteString())
+            .build();
 
         var mintTransactionId = TransactionId.generate(callerAccount);
         var mintValidStartNanos = ChronoUnit.NANOS.between(
-                Instant.EPOCH,
-                mintTransactionId.validStart
+            Instant.EPOCH,
+            mintTransactionId.validStart
         );
 
         var mintFunctionBody = FunctionBody
-                .newBuilder()
-                .setCaller(ByteString.copyFrom(callerKey.getPublicKey().toBytes()))
-                .setOperatorAccountNum(callerAccount.num)
-                .setValidStartNanos(mintValidStartNanos)
-                .setMint(mintFunctionData)
-                .build();
+            .newBuilder()
+            .setCaller(ByteString.copyFrom(callerKey.getPublicKey().toBytes()))
+            .setOperatorAccountNum(callerAccount.num)
+            .setValidStartNanos(mintValidStartNanos)
+            .setMint(mintFunctionData)
+            .build();
 
         var mintFunctionBodyBytes = mintFunctionBody.toByteArray();
         var mintFunctionSignature = callerKey.sign(mintFunctionBodyBytes);
 
         var mintFunction = Function
-                .newBuilder()
-                .setBody(ByteString.copyFrom(mintFunctionBodyBytes))
-                .setSignature(ByteString.copyFrom(mintFunctionSignature))
-                .build();
+            .newBuilder()
+            .setBody(ByteString.copyFrom(mintFunctionBodyBytes))
+            .setSignature(ByteString.copyFrom(mintFunctionSignature))
+            .build();
 
         // Build setApprovalForAll function
 
         var setApprovalForAllFunctionDataBuilder = SetApprovalForAllFunctionData.newBuilder();
 
         var setApprovalForAllFunctionData = setApprovalForAllFunctionDataBuilder
-                .setOperator(toAddress.toByteString())
-                .setApproved(true)
-                .build();
+            .setOperator(toAddress.toByteString())
+            .setApproved(true)
+            .build();
 
-        var setApprovalForAllTransactionId = TransactionId.generate(callerAccount);
+        var setApprovalForAllTransactionId = TransactionId.generate(
+            callerAccount
+        );
         var setApprovalForAllValidStartNanos = ChronoUnit.NANOS.between(
-                Instant.EPOCH,
-                setApprovalForAllTransactionId.validStart
+            Instant.EPOCH,
+            setApprovalForAllTransactionId.validStart
         );
 
         var setApprovalForAllFunctionBody = FunctionBody
-                .newBuilder()
-                .setCaller(ByteString.copyFrom(callerKey.getPublicKey().toBytes()))
-                .setOperatorAccountNum(callerAccount.num)
-                .setValidStartNanos(setApprovalForAllValidStartNanos)
-                .setSetApprovalForAll(setApprovalForAllFunctionData)
-                .build();
+            .newBuilder()
+            .setCaller(ByteString.copyFrom(callerKey.getPublicKey().toBytes()))
+            .setOperatorAccountNum(callerAccount.num)
+            .setValidStartNanos(setApprovalForAllValidStartNanos)
+            .setSetApprovalForAll(setApprovalForAllFunctionData)
+            .build();
 
         var setApprovalForAllFunctionBodyBytes = setApprovalForAllFunctionBody.toByteArray();
-        var setApprovalForAllFunctionSignature = callerKey.sign(setApprovalForAllFunctionBodyBytes);
+        var setApprovalForAllFunctionSignature = callerKey.sign(
+            setApprovalForAllFunctionBodyBytes
+        );
 
         var setApprovalForAllFunction = Function
-                .newBuilder()
-                .setBody(ByteString.copyFrom(setApprovalForAllFunctionBodyBytes))
-                .setSignature(ByteString.copyFrom(setApprovalForAllFunctionSignature))
-                .build();
+            .newBuilder()
+            .setBody(ByteString.copyFrom(setApprovalForAllFunctionBodyBytes))
+            .setSignature(
+                ByteString.copyFrom(setApprovalForAllFunctionSignature)
+            )
+            .build();
 
         // Construct before Pre-Check
-        topicListener.handleFunction(constructorFunction, Instant.ofEpochMilli(constructorValidStartNanos), constructorTransactionId);
-        topicListener.handleFunction(mintFunction, Instant.ofEpochMilli(mintValidStartNanos), mintTransactionId);
+        topicListener.handleFunction(
+            constructorFunction,
+            Instant.ofEpochMilli(constructorValidStartNanos),
+            constructorTransactionId
+        );
+        topicListener.handleFunction(
+            mintFunction,
+            Instant.ofEpochMilli(mintValidStartNanos),
+            mintTransactionId
+        );
 
         // Pre-Check
 
@@ -141,12 +162,17 @@ public class SetApprovalForAllTest {
         Assertions.assertNotEquals(toAddress, callerAddress);
 
         // Update State
-        topicListener.handleFunction(setApprovalForAllFunction, Instant.ofEpochMilli(setApprovalForAllValidStartNanos), setApprovalForAllTransactionId);
-
+        topicListener.handleFunction(
+            setApprovalForAllFunction,
+            Instant.ofEpochMilli(setApprovalForAllValidStartNanos),
+            setApprovalForAllTransactionId
+        );
 
         // Post-Check
 
         // i. OperatorApprovals[caller][operator] = approved
-        Assertions.assertTrue(state.getOperatorApprovals(callerAddress, toAddress));
+        Assertions.assertTrue(
+            state.getOperatorApprovals(callerAddress, toAddress)
+        );
     }
 }

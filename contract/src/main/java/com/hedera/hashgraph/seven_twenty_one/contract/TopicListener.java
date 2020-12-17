@@ -1,6 +1,5 @@
 package com.hedera.hashgraph.seven_twenty_one.contract;
 
-import com.google.errorprone.annotations.Var;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.hedera.hashgraph.sdk.*;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.*;
@@ -108,32 +107,38 @@ public final class TopicListener {
             // ignore the message
             logger.warn(
                 "Ignoring invalid message at sequence " +
-                    topicMessage.sequenceNumber + " due to Exception: " + e.getMessage()
+                topicMessage.sequenceNumber +
+                " due to Exception: " +
+                e.getMessage()
             );
         }
     }
 
-    void handleFunction(Function function, Instant consensusTimestamp, TransactionId transactionId) throws InvalidProtocolBufferException {
+    void handleFunction(
+        Function function,
+        Instant consensusTimestamp,
+        TransactionId transactionId
+    ) throws InvalidProtocolBufferException {
         var functionBody = FunctionBody.parseFrom(function.getBody());
 
         var expectedTransactionId = new TransactionId(
-                new AccountId(functionBody.getOperatorAccountNum()),
-                Instant.ofEpochSecond(0, functionBody.getValidStartNanos())
+            new AccountId(functionBody.getOperatorAccountNum()),
+            Instant.ofEpochSecond(0, functionBody.getValidStartNanos())
         );
 
         var transactionStatus = Status.OK;
         var functionCaller = functionBody.getCaller();
 
         var maybeCaller = Optional
-                .ofNullable(functionCaller.isEmpty() ? null : functionCaller)
-                .map(Address::fromByteString);
+            .ofNullable(functionCaller.isEmpty() ? null : functionCaller)
+            .map(Address::fromByteString);
 
         // get a function handler that matches the data case
         @SuppressWarnings("unchecked")
         var functionHandler = Objects.requireNonNull(
-                (FunctionHandler<Object>) functionHandlers.get(
-                        functionBody.getDataCase()
-                )
+            (FunctionHandler<Object>) functionHandlers.get(
+                functionBody.getDataCase()
+            )
         );
 
         // parse the function arguments from the protobuf data
@@ -143,15 +148,14 @@ public final class TopicListener {
         try {
             try {
                 if (
-                        !(
-                                expectedTransactionId.accountId.equals(
-                                        Objects.requireNonNull(transactionId)
-                                                .accountId
-                                ) &&
-                                        expectedTransactionId.validStart.equals(
-                                                transactionId.validStart
-                                        )
+                    !(
+                        expectedTransactionId.accountId.equals(
+                            Objects.requireNonNull(transactionId).accountId
+                        ) &&
+                        expectedTransactionId.validStart.equals(
+                            transactionId.validStart
                         )
+                    )
                 ) {
                     // the transaction ID in the function body does not match the transaction ID that this
                     // function was submitted under
@@ -173,10 +177,10 @@ public final class TopicListener {
                 // the caller
 
                 if (
-                        !caller.publicKey.verify(
-                                function.getBody().toByteArray(),
-                                signature
-                        )
+                    !caller.publicKey.verify(
+                        function.getBody().toByteArray(),
+                        signature
+                    )
                 ) {
                     throw new StatusException(Status.INVALID_SIGNATURE);
                 }
@@ -208,13 +212,13 @@ public final class TopicListener {
 
             // push our function result
             state.addFunctionResult(
-                    Objects.requireNonNull(transactionId),
-                    new FunctionResult(
-                            consensusTimestamp,
-                            maybeCaller.orElse(null),
-                            transactionId,
-                            transactionStatus
-                    )
+                Objects.requireNonNull(transactionId),
+                new FunctionResult(
+                    consensusTimestamp,
+                    maybeCaller.orElse(null),
+                    transactionId,
+                    transactionStatus
+                )
             );
         } finally {
             if (isLocked) {
@@ -227,12 +231,12 @@ public final class TopicListener {
             try {
                 // persist the transaction to our database
                 transactionRepository.put(
-                        consensusTimestamp,
-                        maybeCaller.orElse(null),
-                        transactionId,
-                        transactionStatus,
-                        functionBody.getDataCase(),
-                        functionArguments
+                    consensusTimestamp,
+                    maybeCaller.orElse(null),
+                    transactionId,
+                    transactionStatus,
+                    functionBody.getDataCase(),
+                    functionArguments
                 );
             } catch (SQLException e) {
                 // re-raise as unchecked to propagate up and terminate the process

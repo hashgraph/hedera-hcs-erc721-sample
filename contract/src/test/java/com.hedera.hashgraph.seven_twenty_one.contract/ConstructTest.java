@@ -9,15 +9,20 @@ import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.seven_twenty_one.proto.ConstructorFunctionData;
 import com.hedera.hashgraph.seven_twenty_one.proto.Function;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-
 public class ConstructTest {
+
     State state = new State();
-    TopicListener topicListener = new TopicListener(state, null, new TopicId(0), null);
+    TopicListener topicListener = new TopicListener(
+        state,
+        null,
+        new TopicId(0),
+        null
+    );
 
     @Test
     public void constructTest() throws InvalidProtocolBufferException {
@@ -33,33 +38,33 @@ public class ConstructTest {
         var functionDataBuilder = ConstructorFunctionData.newBuilder();
 
         var functionData = functionDataBuilder
-                .setTokenName(tokenName)
-                .setTokenSymbol(tokenSymbol)
-                .setBaseURI(baseURI)
-                .build();
+            .setTokenName(tokenName)
+            .setTokenSymbol(tokenSymbol)
+            .setBaseURI(baseURI)
+            .build();
 
         var transactionId = TransactionId.generate(callerAccount);
         var validStartNanos = ChronoUnit.NANOS.between(
-                Instant.EPOCH,
-                transactionId.validStart
+            Instant.EPOCH,
+            transactionId.validStart
         );
 
         var functionBody = FunctionBody
-                .newBuilder()
-                .setCaller(ByteString.copyFrom(callerKey.getPublicKey().toBytes()))
-                .setOperatorAccountNum(callerAccount.num)
-                .setValidStartNanos(validStartNanos)
-                .setConstruct(functionData)
-                .build();
+            .newBuilder()
+            .setCaller(ByteString.copyFrom(callerKey.getPublicKey().toBytes()))
+            .setOperatorAccountNum(callerAccount.num)
+            .setValidStartNanos(validStartNanos)
+            .setConstruct(functionData)
+            .build();
 
         var functionBodyBytes = functionBody.toByteArray();
         var functionSignature = callerKey.sign(functionBodyBytes);
 
         var constructorFunction = Function
-                .newBuilder()
-                .setBody(ByteString.copyFrom(functionBodyBytes))
-                .setSignature(ByteString.copyFrom(functionSignature))
-                .build();
+            .newBuilder()
+            .setBody(ByteString.copyFrom(functionBodyBytes))
+            .setSignature(ByteString.copyFrom(functionSignature))
+            .build();
 
         // Pre-Check
 
@@ -69,10 +74,12 @@ public class ConstructTest {
         // ii. caller != 0x
         Assertions.assertNotNull(callerAddress);
 
-
         // Update State
-        topicListener.handleFunction(constructorFunction, Instant.ofEpochMilli(validStartNanos), transactionId);
-
+        topicListener.handleFunction(
+            constructorFunction,
+            Instant.ofEpochMilli(validStartNanos),
+            transactionId
+        );
 
         // Post-Check
 
