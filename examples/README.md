@@ -1,3 +1,11 @@
+# H721 Usage Example
+
+This is a paired example. The Swift code prepares and signs the function
+call on the contract and then prints the signed function as hex. The typescript
+code accepts this hex-encoded blob, parses, wraps in a Hedera HCS transaction
+and then submits it to the server. This kind of pairing can be used in a client (swift) / server (typescript)
+separation to keep the client-code very simple.
+
 Install `protoc-gen-swift`
 
 ```
