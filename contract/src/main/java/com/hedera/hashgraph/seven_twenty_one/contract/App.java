@@ -14,8 +14,11 @@ import io.vertx.core.Vertx;
 import io.vertx.pgclient.PgConnectOptions;
 import io.vertx.pgclient.PgPool;
 import io.vertx.sqlclient.PoolOptions;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
@@ -87,16 +90,28 @@ public final class App {
     final Vertx vertx = Vertx.vertx();
 
     private App()
-        throws HederaReceiptStatusException, TimeoutException, HederaPreCheckStatusException {}
+        throws HederaReceiptStatusException, TimeoutException, HederaPreCheckStatusException, InterruptedException {}
 
-    Client createHederaClient() {
+    Client createHederaClient() throws InterruptedException {
         var networkName = env.get("H721_NETWORK", "testnet");
         Client client;
 
         // noinspection EnhancedSwitchMigration
         switch (networkName) {
             case "mainnet":
-                client = Client.forMainnet();
+                client =
+                    Client.forNetwork(
+                        Map.ofEntries(
+                            Map.entry("35.237.200.180:50211", new AccountId(3)),
+                            Map.entry("35.186.191.247:50211", new AccountId(4)),
+                            Map.entry("35.192.2.25:50211", new AccountId(5)),
+                            Map.entry("35.199.161.108:50211", new AccountId(6))
+                        )
+                    );
+
+                client.setMirrorNetwork(
+                    List.of("hcs.mainnet.mirrornode.hedera.com:5600")
+                );
                 break;
             case "testnet":
                 client = Client.forTestnet();
@@ -214,8 +229,8 @@ public final class App {
             .setTopicId(topicId)
             .setTransactionId(transactionId)
             .setMessage(function.toByteArray())
-            .execute(hederaClient)
-            .getReceipt(hederaClient);
+            .execute(hederaClient, Duration.ofMinutes(5))
+            .getReceipt(hederaClient, Duration.ofMinutes(5));
 
         logger.warn("Created new Topic {}", topicId);
 
