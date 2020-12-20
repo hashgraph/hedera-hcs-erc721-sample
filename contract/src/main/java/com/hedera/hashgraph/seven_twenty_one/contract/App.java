@@ -94,6 +94,7 @@ public final class App {
 
     Client createHederaClient() throws InterruptedException {
         var networkName = env.get("H721_NETWORK", "testnet");
+        var mirrorNetwork = env.get("H721_MIRROR_NETWORK", "hcs.mainnet.mirrornode.hedera.com:5600");
         Client client;
 
         // noinspection EnhancedSwitchMigration
@@ -109,11 +110,13 @@ public final class App {
                         )
                     );
 
-                client.setMirrorNetwork(
-                    List.of("hcs.mainnet.mirrornode.hedera.com:5600")
-                );
+                logger.info("Create Hedera client for Mainnet");
+                logger.info("Using {} to connect to the hedera mirror network", mirrorNetwork);
+
+                client.setMirrorNetwork(List.of(mirrorNetwork));
                 break;
             case "testnet":
+                logger.info("Create Hedera client for Testnet");
                 client = Client.forTestnet();
                 break;
             default:
