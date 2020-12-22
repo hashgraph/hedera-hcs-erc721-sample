@@ -54,6 +54,10 @@ public final class TopicListener {
     @Nullable
     private SubscriptionHandle hederaSubscriptionHandle;
 
+    private final int watchSleepTimer = 60000;
+
+    private final boolean stopTopicWatcher = false;
+
     public TopicListener(
         State state,
         Client hederaClient,
@@ -243,5 +247,33 @@ public final class TopicListener {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    void startTopicWatcher() {
+        Runnable r = new Runnable() {
+            @Override
+            public void run() {
+                while (!stopTopicWatcher) {
+                    try {
+                        Thread.sleep(watchSleepTimer);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+
+                    boolean ok = checkLastMessage();
+
+                    if (!ok) {
+                        startListening();
+                    }
+                }
+            }
+        };
+
+        Thread topicWatcher = new Thread(r);
+        topicWatcher.start();
+    }
+
+    private boolean checkLastMessage() {
+        return state.getTimestamp().plusMillis(watchSleepTimer).isAfter(Instant.now());
     }
 }
