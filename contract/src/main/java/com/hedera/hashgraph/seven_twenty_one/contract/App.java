@@ -298,6 +298,9 @@ public final class App {
         // run migrations for the persistence layer
         app.runMigrations();
 
+        // start watchdog
+        app.topicListener.startTopicWatcher();
+
         // start listening to the contract instance (topic) on the Hedera
         // mirror node
         app.topicListener.startListening();
