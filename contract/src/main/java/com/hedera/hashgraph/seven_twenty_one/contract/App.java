@@ -100,15 +100,7 @@ public final class App {
         // noinspection EnhancedSwitchMigration
         switch (networkName) {
             case "mainnet":
-                client =
-                    Client.forNetwork(
-                        Map.ofEntries(
-                            Map.entry("35.237.200.180:50211", new AccountId(3)),
-                            Map.entry("35.186.191.247:50211", new AccountId(4)),
-                            Map.entry("35.192.2.25:50211", new AccountId(5)),
-                            Map.entry("35.199.161.108:50211", new AccountId(6))
-                        )
-                    );
+                client = Client.forMainnet();
 
                 logger.info("Create Hedera client for Mainnet");
                 logger.info("Using {} to connect to the hedera mirror network", mirrorNetwork);
@@ -148,7 +140,7 @@ public final class App {
             return maybeTopicId.get();
         }
 
-        // TODO: log that we are creating a new topic
+        logger.info("Topic ID not set, creating new topic");
 
         return createContractInstance();
     }
