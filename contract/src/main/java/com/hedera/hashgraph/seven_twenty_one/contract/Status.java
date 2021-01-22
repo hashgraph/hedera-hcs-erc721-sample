@@ -46,7 +46,10 @@ public enum Status {
     TRANSFER_TO_NOT_SET(12),
 
     /** Constructor function called after the constructor has already been called. */
-    CONSTRUCTOR_ALREADY_CALLED(13);
+    CONSTRUCTOR_ALREADY_CALLED(13),
+
+    /** Burn function called when the caller is not a token owner. */
+    BURN_CALLER_NOT_OWNER(14);
 
     public final int value;
 

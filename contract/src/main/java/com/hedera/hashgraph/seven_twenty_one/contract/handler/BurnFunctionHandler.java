@@ -36,6 +36,9 @@ public final class BurnFunctionHandler
             state.getTokenOwner(arguments.id),
             Status.TOKEN_NOT_FOUND
         );
+
+        // iii. TokenOwners[id] = caller
+        ensure(state.getTokenOwner(arguments.id) == caller, Status.BURN_CALLER_NOT_OWNER);
     }
 
     @Override
