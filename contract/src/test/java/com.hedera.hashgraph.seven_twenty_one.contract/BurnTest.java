@@ -11,6 +11,7 @@ import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -121,14 +122,14 @@ public class BurnTest {
 
         var burnFunctionBody = FunctionBody
             .newBuilder()
-            .setCaller(ByteString.copyFrom(callerKey.getPublicKey().toBytes()))
+            .setCaller(ByteString.copyFrom(toKey.getPublicKey().toBytes()))
             .setOperatorAccountNum(callerAccount.num)
             .setValidStartNanos(burnValidStartNanos)
             .setBurn(burnFunctionData)
             .build();
 
         var burnFunctionBodyBytes = burnFunctionBody.toByteArray();
-        var burnFunctionSignature = callerKey.sign(burnFunctionBodyBytes);
+        var burnFunctionSignature = toKey.sign(burnFunctionBodyBytes);
 
         var burnFunction = Function
             .newBuilder()
@@ -160,7 +161,7 @@ public class BurnTest {
         Assertions.assertEquals(state.getOwner(), callerAddress);
 
         // Prepare for post-check
-        var tokenOwner = state.getTokenOwner(tokenId);
+        var tokenOwner = Objects.requireNonNull(state.getTokenOwner(tokenId));
         var preHolderTokens = state.getTokens(tokenOwner);
         Set<Int> postHolderTokens = new HashSet<>(preHolderTokens);
         postHolderTokens.remove(tokenId);
@@ -175,7 +176,10 @@ public class BurnTest {
         // Post-Check
 
         // i. HolderTokens[TokenOwners[id]]’ = HolderTokens[TokenOwners[id]] \ {id}
-        Assertions.assertEquals(postHolderTokens, state.getTokens(tokenOwner));
+        Assertions.assertEquals(
+            postHolderTokens,
+            Objects.requireNonNull(state.getTokens(tokenOwner))
+        );
 
         // ii. TokenOwners[id] = 0x
         Assertions.assertNull(state.getTokenOwner(tokenId));

@@ -18,7 +18,6 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeoutException;
@@ -94,7 +93,10 @@ public final class App {
 
     Client createHederaClient() throws InterruptedException {
         var networkName = env.get("H721_NETWORK", "testnet");
-        var mirrorNetwork = env.get("H721_MIRROR_NETWORK", "hcs.mainnet.mirrornode.hedera.com:5600");
+        var mirrorNetwork = env.get(
+            "H721_MIRROR_NETWORK",
+            "hcs.mainnet.mirrornode.hedera.com:5600"
+        );
         Client client;
 
         // noinspection EnhancedSwitchMigration
@@ -103,7 +105,10 @@ public final class App {
                 client = Client.forMainnet();
 
                 logger.info("Create Hedera client for Mainnet");
-                logger.info("Using {} to connect to the hedera mirror network", mirrorNetwork);
+                logger.info(
+                    "Using {} to connect to the hedera mirror network",
+                    mirrorNetwork
+                );
 
                 client.setMirrorNetwork(List.of(mirrorNetwork));
                 break;

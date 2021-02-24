@@ -67,17 +67,17 @@ allprojects {
 			greclipse()
 		}
 	}
-}
 
-tasks.withType(Test) {
-	useJUnitPlatform()
+	tasks.withType(Test) {
+		useJUnitPlatform()
 
-	// this task will fail on the first failed test
-	failFast = true
+		// this task will fail on the first failed test
+		failFast = true
 
-	// emit logs per passed or failed test
-	testLogging {
-		exceptionFormat = 'full'
-		events "passed", "skipped", "failed", "standardOut", "standardError"
+		// emit logs per passed or failed test
+		testLogging {
+			exceptionFormat = 'full'
+			events "passed", "skipped", "failed", "standardOut", "standardError"
+		}
 	}
 }

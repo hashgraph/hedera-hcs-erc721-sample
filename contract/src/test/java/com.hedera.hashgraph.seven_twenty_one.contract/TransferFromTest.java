@@ -7,13 +7,15 @@ import com.hedera.hashgraph.sdk.PrivateKey;
 import com.hedera.hashgraph.sdk.TopicId;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.seven_twenty_one.proto.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 public class TransferFromTest {
 
@@ -459,7 +461,7 @@ public class TransferFromTest {
         // OperatorApprovals[TokenOwners[id]][caller]
         Assertions.assertTrue(
             state.getOperatorApprovals(
-                state.getTokenOwner(tokenId),
+                Objects.requireNonNull(state.getTokenOwner(tokenId)),
                 approvedAddress
             )
         );

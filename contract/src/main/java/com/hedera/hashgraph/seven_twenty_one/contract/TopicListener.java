@@ -44,25 +44,28 @@ public final class TopicListener {
     private final State state;
 
     // client to interact with the hedera network
+    // nullable for testing
+    @Nullable
     private final Client hederaClient;
 
     // the topic that we are listening to for function calls
     private final TopicId hederaTopicId;
+
+    // nullable for testing
+    @Nullable
     private final TransactionRepository transactionRepository;
 
     // handle of the open subscription to the topic
     @Nullable
     private SubscriptionHandle hederaSubscriptionHandle;
 
-    private final int watchSleepTimer = 60000;
-
-    private final boolean stopTopicWatcher = false;
+    private final int watchSleepTimer = 60_000; // ms (60 seconds)
 
     public TopicListener(
         State state,
-        Client hederaClient,
+        @Nullable Client hederaClient,
         TopicId hederaTopicId,
-        TransactionRepository transactionRepository
+        @Nullable TransactionRepository transactionRepository
     ) {
         this.state = state;
         this.hederaClient = hederaClient;
@@ -71,9 +74,13 @@ public final class TopicListener {
     }
 
     public synchronized void startListening() {
+        var firstListen = hederaSubscriptionHandle == null;
+
         stopListening();
 
-        logger.info("Listening to Topic {}", hederaTopicId);
+        if (firstListen) {
+            logger.info("Listening to Topic {}", hederaTopicId);
+        }
 
         hederaSubscriptionHandle =
             new TopicMessageQuery()
@@ -82,10 +89,14 @@ public final class TopicListener {
                     Optional
                         .ofNullable(state.getTimestamp())
                         .orElse(Instant.EPOCH)
-                        // the server returns messages from this timestamp onwards so to "resume" we give it +1 ns
+                        // the server returns messages from this timestamp onwards so
+                        // to "resume" we give it +1 ns
                         .plusNanos(1)
                 )
-                .subscribe(hederaClient, this::handleTopicMessage);
+                .subscribe(
+                    Objects.requireNonNull(hederaClient),
+                    this::handleTopicMessage
+                );
     }
 
     public synchronized void stopListening() {
@@ -250,21 +261,20 @@ public final class TopicListener {
     }
 
     void startTopicWatcher() {
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                while (!stopTopicWatcher) {
-                    try {
-                        Thread.sleep(watchSleepTimer);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
+        Runnable r = () -> {
+            while (true) {
+                try {
+                    // noinspection BusyWait
+                    Thread.sleep(watchSleepTimer);
+                } catch (InterruptedException e) {
+                    // interrupted
+                    return;
+                }
 
-                    boolean ok = checkLastMessage();
+                boolean ok = checkLastMessage();
 
-                    if (!ok) {
-                        startListening();
-                    }
+                if (!ok) {
+                    startListening();
                 }
             }
         };
@@ -274,6 +284,16 @@ public final class TopicListener {
     }
 
     private boolean checkLastMessage() {
-        return state.getTimestamp().plusMillis(watchSleepTimer).isAfter(Instant.now());
+        var stateTimestamp = state.getTimestamp();
+
+        if (stateTimestamp == null) {
+            // no state yet, we're not ok
+            // this means its been more than ~60 seconds and we haven't seen anything
+            return false;
+        }
+
+        return stateTimestamp
+            .plusMillis(watchSleepTimer)
+            .isAfter(Instant.now());
     }
 }
