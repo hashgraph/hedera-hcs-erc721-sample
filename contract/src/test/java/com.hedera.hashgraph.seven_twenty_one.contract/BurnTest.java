@@ -7,14 +7,15 @@ import com.hedera.hashgraph.sdk.PrivateKey;
 import com.hedera.hashgraph.sdk.TopicId;
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.seven_twenty_one.proto.*;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 public class BurnTest {
 
@@ -141,12 +142,14 @@ public class BurnTest {
         topicListener.handleFunction(
             constructorFunction,
             Instant.ofEpochMilli(constructorValidStartNanos),
-            constructorTransactionId
+            constructorTransactionId,
+            1
         );
         topicListener.handleFunction(
             mintFunction,
             Instant.ofEpochMilli(mintValidStartNanos),
-            mintTransactionId
+            mintTransactionId,
+                1
         );
 
         // Pre-Check
@@ -170,7 +173,8 @@ public class BurnTest {
         topicListener.handleFunction(
             burnFunction,
             Instant.ofEpochMilli(burnValidStartNanos),
-            burnTransactionId
+            burnTransactionId,
+            1
         );
 
         // Post-Check

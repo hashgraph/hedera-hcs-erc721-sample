@@ -152,12 +152,14 @@ public class TransferFromTest {
         topicListener.handleFunction(
             constructorFunction,
             Instant.ofEpochMilli(constructorValidStartNanos),
-            constructorTransactionId
+            constructorTransactionId,
+                1
         );
         topicListener.handleFunction(
             mintFunction,
             Instant.ofEpochMilli(mintValidStartNanos),
-            mintTransactionId
+            mintTransactionId,
+                1
         );
 
         // Pre-Check
@@ -191,7 +193,8 @@ public class TransferFromTest {
         topicListener.handleFunction(
             transferFromFunction,
             Instant.ofEpochMilli(transferFromValidStartNanos),
-            transferFromTransactionId
+            transferFromTransactionId,
+                1
         );
 
         // Post-Check
@@ -249,17 +252,20 @@ public class TransferFromTest {
         topicListener.handleFunction(
             constructorFunction,
             Instant.ofEpochMilli(constructorValidStartNanos),
-            constructorTransactionId
+            constructorTransactionId,
+                1
         );
         topicListener.handleFunction(
             mintFunction,
             Instant.ofEpochMilli(mintValidStartNanos),
-            mintTransactionId
+            mintTransactionId,
+                1
         );
         topicListener.handleFunction(
             approveFunction,
             Instant.ofEpochMilli(approveValidStartNanos),
-            approveTransactionId
+            approveTransactionId,
+                1
         );
 
         transferFromFunctionData =
@@ -334,7 +340,8 @@ public class TransferFromTest {
         topicListener.handleFunction(
             transferFromFunction,
             Instant.ofEpochMilli(transferFromValidStartNanos),
-            transferFromTransactionId
+            transferFromTransactionId,
+                1
         );
 
         // Post-Check
@@ -398,17 +405,20 @@ public class TransferFromTest {
         topicListener.handleFunction(
             constructorFunction,
             Instant.ofEpochMilli(constructorValidStartNanos),
-            constructorTransactionId
+            constructorTransactionId,
+                1
         );
         topicListener.handleFunction(
             mintFunction,
             Instant.ofEpochMilli(mintValidStartNanos),
-            mintTransactionId
+            mintTransactionId,
+                1
         );
         topicListener.handleFunction(
             setApprovalForAllFunction,
             Instant.ofEpochMilli(setApprovalForAllValidStartNanos),
-            setApprovalForAllTransactionId
+            setApprovalForAllTransactionId,
+                1
         );
 
         transferFromFunctionData =
@@ -485,7 +495,8 @@ public class TransferFromTest {
         topicListener.handleFunction(
             transferFromFunction,
             Instant.ofEpochMilli(transferFromValidStartNanos),
-            transferFromTransactionId
+            transferFromTransactionId,
+                1
         );
 
         // Post-Check

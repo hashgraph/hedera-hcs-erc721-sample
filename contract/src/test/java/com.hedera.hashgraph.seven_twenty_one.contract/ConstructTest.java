@@ -9,10 +9,11 @@ import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.seven_twenty_one.proto.ConstructorFunctionData;
 import com.hedera.hashgraph.seven_twenty_one.proto.Function;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 public class ConstructTest {
 
@@ -78,7 +79,8 @@ public class ConstructTest {
         topicListener.handleFunction(
             constructorFunction,
             Instant.ofEpochMilli(validStartNanos),
-            transactionId
+            transactionId,
+                1
         );
 
         // Post-Check

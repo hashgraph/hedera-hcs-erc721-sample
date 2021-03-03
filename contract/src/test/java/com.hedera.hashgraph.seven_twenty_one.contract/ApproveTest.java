@@ -145,12 +145,14 @@ public class ApproveTest {
         topicListener.handleFunction(
             constructorFunction,
             Instant.ofEpochMilli(constructorValidStartNanos),
-            constructorTransactionId
+            constructorTransactionId,
+                1
         );
         topicListener.handleFunction(
             mintFunction,
             Instant.ofEpochMilli(mintValidStartNanos),
-            mintTransactionId
+            mintTransactionId,
+                1
         );
 
         // Pre-Check
@@ -175,7 +177,8 @@ public class ApproveTest {
         topicListener.handleFunction(
             approveFunction,
             Instant.ofEpochMilli(approveValidStartNanos),
-            approveTransactionId
+            approveTransactionId,
+                1
         );
 
         // Post-Check
@@ -256,17 +259,20 @@ public class ApproveTest {
         topicListener.handleFunction(
             constructorFunction,
             Instant.ofEpochMilli(constructorValidStartNanos),
-            constructorTransactionId
+            constructorTransactionId,
+                1
         );
         topicListener.handleFunction(
             mintFunction,
             Instant.ofEpochMilli(mintValidStartNanos),
-            mintTransactionId
+            mintTransactionId,
+                1
         );
         topicListener.handleFunction(
             setApprovalForAllFunction,
             Instant.ofEpochMilli(setApprovalForAllValidStartNanos),
-            setApprovalForAllTransactionId
+            setApprovalForAllTransactionId,
+                1
         );
 
         // Pre-Check
@@ -296,7 +302,8 @@ public class ApproveTest {
         topicListener.handleFunction(
             approveFunction,
             Instant.ofEpochMilli(approveValidStartNanos),
-            approveTransactionId
+            approveTransactionId,
+                1
         );
 
         // Post-Check

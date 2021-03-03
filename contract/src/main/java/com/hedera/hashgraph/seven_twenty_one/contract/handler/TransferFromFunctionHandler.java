@@ -7,9 +7,10 @@ import com.hedera.hashgraph.seven_twenty_one.contract.Status;
 import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.TransferFromFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
-import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Objects;
 
 public final class TransferFromFunctionHandler
     extends FunctionHandler<TransferFromFunctionArguments> {
@@ -76,9 +77,10 @@ public final class TransferFromFunctionHandler
     }
 
     @Override
-    public void log(Address caller, TransferFromFunctionArguments arguments) {
+    public void log(long sequenceNumber, Address caller, TransferFromFunctionArguments arguments) {
         logger.info(
-            "TransferFrom caller: {}, from: {}, to: {}, token: {}",
+            "[{}] TransferFrom caller: {}, from: {}, to: {}, token: {}",
+            sequenceNumber,
             caller,
             arguments.from,
             arguments.to,

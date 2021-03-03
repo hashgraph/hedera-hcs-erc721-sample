@@ -6,9 +6,10 @@ import com.hedera.hashgraph.seven_twenty_one.contract.Status;
 import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.MintFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
-import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Objects;
 
 public final class MintFunctionHandler
     extends FunctionHandler<MintFunctionArguments> {
@@ -60,9 +61,10 @@ public final class MintFunctionHandler
     }
 
     @Override
-    public void log(Address caller, MintFunctionArguments arguments) {
+    public void log(long sequenceNumber, Address caller, MintFunctionArguments arguments) {
         logger.info(
-            "Mint caller: {}, to: {}, token: {}",
+            "[{}] Mint caller: {}, to: {}, token: {}",
+            sequenceNumber,
             caller,
             arguments.to,
             arguments.id

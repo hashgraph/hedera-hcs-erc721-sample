@@ -10,13 +10,14 @@ import com.hedera.hashgraph.seven_twenty_one.proto.ConstructorFunctionData;
 import com.hedera.hashgraph.seven_twenty_one.proto.Function;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
 import com.hedera.hashgraph.seven_twenty_one.proto.MintFunctionData;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+
 import java.math.BigInteger;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Set;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
 
 public class MintTest {
 
@@ -112,7 +113,8 @@ public class MintTest {
         topicListener.handleFunction(
             constructorFunction,
             Instant.ofEpochMilli(constructorValidStartNanos),
-            constructorTransactionId
+            constructorTransactionId,
+                1
         );
 
         // Pre-Check
@@ -135,7 +137,8 @@ public class MintTest {
         topicListener.handleFunction(
             mintFunction,
             Instant.ofEpochMilli(mintValidStartNanos),
-            mintTransactionId
+            mintTransactionId,
+                1
         );
 
         // Post-Check
@@ -267,7 +270,8 @@ public class MintTest {
         topicListener.handleFunction(
             constructorFunction,
             Instant.ofEpochMilli(constructorValidStartNanos),
-            constructorTransactionId
+            constructorTransactionId,
+                1
         );
 
         // Pre-Check
@@ -290,7 +294,8 @@ public class MintTest {
         topicListener.handleFunction(
             mintFunction,
             Instant.ofEpochMilli(mintValidStartNanos),
-            mintTransactionId
+            mintTransactionId,
+                1
         );
 
         // Post-Check

@@ -53,11 +53,13 @@ public final class SetApprovalForAllFunctionHandler
 
     @Override
     public void log(
+        long sequenceNumber,
         Address caller,
         SetApprovalForAllFunctionArguments arguments
     ) {
         logger.info(
-            "SetApprovalForAll caller: {}, operator: {}, approved: {}",
+            "[{}] SetApprovalForAll caller: {}, operator: {}, approved: {}",
+            sequenceNumber,
             caller,
             arguments.operator,
             arguments.approved

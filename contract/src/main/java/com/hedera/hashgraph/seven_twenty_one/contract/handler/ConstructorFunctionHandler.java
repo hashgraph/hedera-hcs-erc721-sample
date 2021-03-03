@@ -71,9 +71,10 @@ public final class ConstructorFunctionHandler
     }
 
     @Override
-    public void log(Address caller, ConstructorFunctionArguments arguments) {
+    public void log(long sequenceNumber, Address caller, ConstructorFunctionArguments arguments) {
         logger.info(
-            "Constructor caller: {}, tokenName: {}, tokenSymbol: {}, baseURI: {}",
+            "[{}] Constructor caller: {}, tokenName: {}, tokenSymbol: {}, baseURI: {}",
+            sequenceNumber,
             caller,
             arguments.tokenName,
             arguments.tokenSymbol,

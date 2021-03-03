@@ -6,9 +6,10 @@ import com.hedera.hashgraph.seven_twenty_one.contract.Status;
 import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.ApproveFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
-import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Objects;
 
 public final class ApproveFunctionHandler
     extends FunctionHandler<ApproveFunctionArguments> {
@@ -60,9 +61,10 @@ public final class ApproveFunctionHandler
     }
 
     @Override
-    public void log(Address caller, ApproveFunctionArguments arguments) {
+    public void log(long sequenceNumber, Address caller, ApproveFunctionArguments arguments) {
         logger.info(
-            "Approve caller: {}, spender: {}, token: {}",
+            "[{}] Approve caller: {}, spender: {}, token: {}",
+            sequenceNumber,
             caller,
             arguments.spender,
             arguments.id

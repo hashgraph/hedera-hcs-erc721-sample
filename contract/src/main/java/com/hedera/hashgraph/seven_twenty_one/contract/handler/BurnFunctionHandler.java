@@ -6,9 +6,10 @@ import com.hedera.hashgraph.seven_twenty_one.contract.Status;
 import com.hedera.hashgraph.seven_twenty_one.contract.StatusException;
 import com.hedera.hashgraph.seven_twenty_one.contract.handler.arguments.BurnFunctionArguments;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
-import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Objects;
 
 public final class BurnFunctionHandler
     extends FunctionHandler<BurnFunctionArguments> {
@@ -67,7 +68,7 @@ public final class BurnFunctionHandler
     }
 
     @Override
-    public void log(Address caller, BurnFunctionArguments arguments) {
-        logger.info("Burn caller: {}, token: {}", caller, arguments.id);
+    public void log(long sequenceNumber, Address caller, BurnFunctionArguments arguments) {
+        logger.info("[{}] Burn caller: {}, token: {}", sequenceNumber, caller, arguments.id);
     }
 }

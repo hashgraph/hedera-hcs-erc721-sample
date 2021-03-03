@@ -85,9 +85,8 @@ public final class TopicListener {
         var topicMessageQuery = new TopicMessageQuery()
             .setTopicId(hederaTopicId);
 
-        if (stateTimestamp.isPresent()) {
-            topicMessageQuery.setStartTime(stateTimestamp.get().plusNanos(1));
-        }
+        stateTimestamp.ifPresent(instant ->
+                topicMessageQuery.setStartTime(instant.plusNanos(1)));
 
         hederaSubscriptionHandle = topicMessageQuery.subscribe(
             Objects.requireNonNull(hederaClient),
@@ -112,7 +111,7 @@ public final class TopicListener {
 
         try {
             function = Function.parseFrom(topicMessage.contents);
-            handleFunction(function, consensusTimestamp, transactionId);
+            handleFunction(function, consensusTimestamp, transactionId, topicMessage.sequenceNumber);
         } catch (Exception e) {
             // this is not a true error, someone submitted a protobuf that we don't understand
             // ignore the message
@@ -128,7 +127,8 @@ public final class TopicListener {
     void handleFunction(
         Function function,
         Instant consensusTimestamp,
-        TransactionId transactionId
+        TransactionId transactionId,
+        long sequenceNumber
     ) throws InvalidProtocolBufferException {
         var functionBody = FunctionBody.parseFrom(function.getBody());
 
@@ -208,7 +208,7 @@ public final class TopicListener {
 
                 // finally, call the function (and log its operation for debugging)
                 functionHandler.call(state, caller, functionArguments);
-                functionHandler.log(caller, functionArguments);
+                functionHandler.log(sequenceNumber, caller, functionArguments);
             } catch (StatusException e) {
                 transactionStatus = e.status;
             }

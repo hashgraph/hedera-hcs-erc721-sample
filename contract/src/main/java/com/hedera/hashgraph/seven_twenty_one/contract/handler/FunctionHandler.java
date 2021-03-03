@@ -17,7 +17,7 @@ public abstract class FunctionHandler<ArgumentsT> {
         ArgumentsT arguments
     ) throws StatusException;
 
-    public abstract void log(Address caller, ArgumentsT arguments);
+    public abstract void log(long sequenceNumber, Address caller, ArgumentsT arguments);
 
     public abstract void call(
         State state,
