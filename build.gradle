@@ -25,12 +25,12 @@ allprojects {
 	}
 
 	dependencies {
-		errorprone "com.google.errorprone:error_prone_core:2.4.0"
-		compileOnly "com.google.errorprone:error_prone_annotations:2.4.0"
+		errorprone "com.google.errorprone:error_prone_core:2.5.1"
+		compileOnly "com.google.errorprone:error_prone_annotations:2.5.1"
 
 		errorprone "com.uber.nullaway:nullaway:0.7.9"
 
-		compileOnly "jakarta.annotation:jakarta.annotation-api:2.0.0-RC1"
+		compileOnly "jakarta.annotation:jakarta.annotation-api:2.0.0"
 		compileOnly "com.google.code.findbugs:jsr305:3.0.2"
 	}
 
