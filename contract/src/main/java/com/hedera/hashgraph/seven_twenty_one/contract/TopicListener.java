@@ -82,21 +82,19 @@ public final class TopicListener {
             logger.info("Listening to Topic {}", hederaTopicId);
         }
 
-        hederaSubscriptionHandle =
-            new TopicMessageQuery()
-                .setTopicId(hederaTopicId)
-                .setStartTime(
-                    Optional
-                        .ofNullable(state.getTimestamp())
-                        .orElse(Instant.EPOCH)
-                        // the server returns messages from this timestamp onwards so
-                        // to "resume" we give it +1 ns
-                        .plusNanos(1)
-                )
-                .subscribe(
-                    Objects.requireNonNull(hederaClient),
-                    this::handleTopicMessage
-                );
+        var stateTimestamp = Optional.ofNullable(state.getTimestamp());
+
+        var topicMessageQuery = new TopicMessageQuery()
+            .setTopicId(hederaTopicId);
+
+        if (stateTimestamp.isPresent()) {
+            topicMessageQuery.setStartTime(stateTimestamp.get().plusNanos(1));
+        }
+
+        hederaSubscriptionHandle = topicMessageQuery.subscribe(
+            Objects.requireNonNull(hederaClient),
+            this::handleTopicMessage
+        );
     }
 
     public synchronized void stopListening() {

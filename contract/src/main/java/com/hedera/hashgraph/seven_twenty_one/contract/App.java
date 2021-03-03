@@ -89,7 +89,7 @@ public final class App {
     final Vertx vertx = Vertx.vertx();
 
     private App()
-        throws HederaReceiptStatusException, TimeoutException, HederaPreCheckStatusException, InterruptedException {}
+        throws ReceiptStatusException, TimeoutException, PrecheckStatusException, InterruptedException {}
 
     Client createHederaClient() throws InterruptedException {
         var networkName = env.get("H721_NETWORK", "testnet");
@@ -136,7 +136,7 @@ public final class App {
     }
 
     TopicId getOrCreateContractInstance()
-        throws HederaReceiptStatusException, TimeoutException, HederaPreCheckStatusException {
+        throws ReceiptStatusException, TimeoutException, PrecheckStatusException {
         var maybeTopicId = Optional
             .ofNullable(env.get("H721_TOPIC"))
             .map(TopicId::fromString);
@@ -151,7 +151,7 @@ public final class App {
     }
 
     TopicId createContractInstance()
-        throws TimeoutException, HederaPreCheckStatusException, HederaReceiptStatusException {
+        throws TimeoutException, PrecheckStatusException, ReceiptStatusException {
         var tokenName = requireEnv("H721_TOKEN_NAME");
         var tokenSymbol = requireEnv("H721_TOKEN_SYMBOL");
         var baseUri = env.get("H721_BASE_URI");
@@ -289,7 +289,7 @@ public final class App {
     }
 
     public static void main(String[] args)
-        throws InterruptedException, HederaReceiptStatusException, TimeoutException, HederaPreCheckStatusException {
+        throws InterruptedException, ReceiptStatusException, TimeoutException, PrecheckStatusException {
         var app = new App();
 
         // run migrations for the persistence layer

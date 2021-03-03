@@ -1,6 +1,5 @@
 package com.hedera.hashgraph.seven_twenty_one.contract;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.hedera.hashgraph.sdk.TransactionId;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -246,19 +245,19 @@ public final class State {
         return tokenURIs.isEmpty();
     }
 
-    @VisibleForTesting
+    // VisibleForTesting
     @Nullable
     Address getTokenApprovals(Int tokenId) {
         return tokenApprovals.get(tokenId);
     }
 
-    @VisibleForTesting
+    // VisibleForTesting
     @Nullable
     String getTokenURIs(Int tokenId) {
         return tokenURIs.get(tokenId);
     }
 
-    @VisibleForTesting
+    // VisibleForTesting
     boolean getOperatorApprovals(Address caller, Address operator) {
         return Optional
             .ofNullable(operatorApprovals.get(caller))
