@@ -1,21 +1,22 @@
 package com.hedera.hashgraph.seven_twenty_one.contract.repository;
 
-import static com.hedera.hashgraph.seven_twenty_one.contract.db.Tables.ADDRESS_TRANSACTION;
-import static com.hedera.hashgraph.seven_twenty_one.contract.db.Tables.TRANSACTION;
-
 import com.hedera.hashgraph.sdk.TransactionId;
 import com.hedera.hashgraph.seven_twenty_one.contract.Address;
 import com.hedera.hashgraph.seven_twenty_one.contract.Status;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
+import org.jooq.BatchBindStep;
+import org.jooq.DSLContext;
+
+import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import javax.annotation.Nullable;
-import org.jooq.BatchBindStep;
-import org.jooq.DSLContext;
+
+import static com.hedera.hashgraph.seven_twenty_one.contract.db.Tables.ADDRESS_TRANSACTION;
+import static com.hedera.hashgraph.seven_twenty_one.contract.db.Tables.TRANSACTION;
 
 public class TransactionRepository {
 
@@ -107,7 +108,7 @@ public class TransactionRepository {
         );
     }
 
-    public <ArgumentsT> void put(
+    public synchronized <ArgumentsT> void put(
         Instant consensusTimestamp,
         Address caller,
         TransactionId transactionId,
@@ -174,7 +175,7 @@ public class TransactionRepository {
         }
     }
 
-    public void execute() {
+    public synchronized void execute() {
         if (transactionBatch != null) {
             transactionBatch.execute();
             transactionBatch = null;

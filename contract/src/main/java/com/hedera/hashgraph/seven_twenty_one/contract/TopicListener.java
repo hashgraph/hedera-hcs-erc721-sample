@@ -6,20 +6,18 @@ import com.hedera.hashgraph.seven_twenty_one.contract.handler.*;
 import com.hedera.hashgraph.seven_twenty_one.contract.repository.TransactionRepository;
 import com.hedera.hashgraph.seven_twenty_one.proto.Function;
 import com.hedera.hashgraph.seven_twenty_one.proto.FunctionBody;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.annotation.Nullable;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import javax.annotation.Nullable;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public final class TopicListener {
-
-    private static final Logger logger = LogManager.getLogger(
-        TopicListener.class
-    );
+    private static final Logger logger = LogManager.getLogger(TopicListener.class);
 
     // map of incoming function case to the handler that will accept
     private final Map<FunctionBody.DataCase, FunctionHandler<?>> functionHandlers = Map.ofEntries(
