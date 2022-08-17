@@ -30,7 +30,7 @@
     "@hashgraph/sdk": "2.0.6",
     "dotenv": "^8.2.0",
     "node-biginteger": "^0.0.10",
-    "protobufjs": "^6.10.2",
+    "protobufjs": "^6.10.3",
     "yargs": "^16.1.1"
   }
 }
